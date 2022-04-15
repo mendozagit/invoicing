@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AEDCF655-A275-4C3E-A712-9262644575BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{79351818-D69B-46B5-A86A-E8349D4B586D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{F72FFB4A-2932-4C18-AEF4-DFB58C41851C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{8C9DD233-E248-4F75-9F0C-0A19CE09B938}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Invoicing", "src\Invoicing\Invoicing.csproj", "{9A04F8DA-881A-4323-9AE5-164D6A06D06D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9A04F8DA-881A-4323-9AE5-164D6A06D06D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A04F8DA-881A-4323-9AE5-164D6A06D06D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A04F8DA-881A-4323-9AE5-164D6A06D06D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A04F8DA-881A-4323-9AE5-164D6A06D06D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9A04F8DA-881A-4323-9AE5-164D6A06D06D} = {AEDCF655-A275-4C3E-A712-9262644575BF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6CF96F9E-CE06-45B4-9A43-33D7BDD5D293}
+	EndGlobalSection
+EndGlobal
