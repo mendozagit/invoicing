@@ -1,4 +1,5 @@
-﻿using Invoicing.Common;
+﻿using System.Xml.Serialization;
+using Invoicing.Common;
 
 namespace Invoicing.Base;
 
@@ -21,4 +22,13 @@ public class Invoice
     public decimal Total { get; set; }
     public string? PaymentMethod { get; set; }
     public string? ExpeditionZipCode { get; set; }
+
+
+    [XmlArray(ElementName = "CfdiRelacioandos", Namespace = InvoiceConstants.NamespaceV40)]
+    [XmlArrayItem(ElementName = "CfdiRelacioando", Namespace = InvoiceConstants.NamespaceV40)]
+    public List<InvoiceRelated>? InvoiceRelateds { get; set; }
+
+
+    
+    public InvoiceIssuer? InvoiceIssuer { get; set; }
 }

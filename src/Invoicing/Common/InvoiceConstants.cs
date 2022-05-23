@@ -10,5 +10,6 @@ namespace Invoicing.Common
     {
         public const string NationalTin = "XAXX010101000";
         public const string ForeignTin = "XEXX010101000";
+        public const string NamespaceV40 = "http://www.sat.gob.mx/cfd/4";
     }
 }
