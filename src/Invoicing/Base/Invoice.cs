@@ -29,6 +29,16 @@ public class Invoice
     public List<InvoiceRelated>? InvoiceRelateds { get; set; }
 
 
-    
-    public InvoiceIssuer? InvoiceIssuer { get; set; }
+    [XmlElement(ElementName = "Emisor")] public InvoiceIssuer? InvoiceIssuer { get; set; }
+
+
+    [XmlElement(ElementName = "Receptor")] 
+    public InvoiceRecipient? InvoiceRecipient { get; set; }
+
+
+    [XmlArray(ElementName = "Conceptos", Namespace = InvoiceConstants.NamespaceV40)]
+    [XmlArrayItem(ElementName = "Concepto", Namespace = InvoiceConstants.NamespaceV40)]
+    public List<InvoiceItem>? InvoiceItems { get; set; } = new();
+
+
 }
