@@ -1,4 +1,5 @@
 ﻿using System.Xml.Serialization;
+using Invoicing.Common;
 
 namespace Invoicing.Base;
 
@@ -28,7 +29,7 @@ public class InvoiceItem
     /// Atributo requerido para precisar la clave de unidad de medida estandarizada aplicable para la cantidad expresada en el concepto. La unidad debe corresponder con la descripción del concepto.
     /// </summary>
     [XmlAttribute("ClaveUnidad")]
-    public string? SatUnitOfMeasure { get; set; }
+    public string? UnitOfMeasureId { get; set; }
 
 
     /// <summary>
@@ -47,13 +48,13 @@ public class InvoiceItem
     /// Atributo requerido para precisar el valor o precio unitario del bien o servicio cubierto por el presente concepto.
     /// </summary>
     [XmlAttribute("ValorUnitario")]
-    public decimal UnitPrice { get; set; }
+    public decimal UnitCost { get; set; }
 
     /// <summary>
     /// Atributo requerido para precisar el importe total de los bienes o servicios del presente concepto. Debe ser equivalente al resultado de multiplicar la cantidad por el valor unitario expresado en el concepto. No se permiten valores negativos.
     /// </summary>
     [XmlAttribute("Importe")]
-    public decimal Total { get; set; }
+    public decimal Amount { get; set; }
 
     /// <summary>
     /// Atributo opcional para representar el importe de los descuentos aplicables al concepto. No se permiten valores negativos.
@@ -66,4 +67,9 @@ public class InvoiceItem
     /// </summary>
     [XmlAttribute("ObjetoImp")]
     public string? TaxObjectId { get; set; }
+
+
+
+   
+
 }

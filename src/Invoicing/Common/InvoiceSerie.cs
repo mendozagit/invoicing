@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Invoicing.Common
 {
-    public static class InvoiceSeries
+    public static class InvoiceSerie
     {
         public const string Ingreso = "F";
         public const string Egreso = "NC";

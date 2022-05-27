@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Invoicing.Common
 {
-    public static class InvoiceVersions
+    public static class InvoiceCurrency
     {
-        public const string V40 = "4.0";
-        public const string V33 = "3.3";
+        public const string MXN = "MXN";
+        public const string USD = "USD";
     }
 }
