@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Invoicing.Common
+﻿namespace Invoicing.Common.Extensions
 {
-    public static class InvoicingExtensions
+    public static class InvoiceExtensions
     {
         private const string SatFormat = "yyyy-MM-ddTHH:mm:ss";
 

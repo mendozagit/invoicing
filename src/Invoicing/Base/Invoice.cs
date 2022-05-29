@@ -1,9 +1,11 @@
 ﻿using System.Xml.Serialization;
 using Invoicing.Common;
+using Invoicing.Common.Constants;
+using Invoicing.Common.Enums;
 
 namespace Invoicing.Base;
 
-[XmlRoot("Comprobante", Namespace = InvoiceConstants.NamespaceV40)]
+[XmlRoot("Comprobante", Namespace = InvoiceConstants.CurrentNamespace)]
 public class Invoice
 {
     /// <summary>
@@ -133,8 +135,8 @@ public class Invoice
     /// <summary>
     /// Nodo opcional para precisar la información de los comprobantes relacionados.
     /// </summary>
-    [XmlArray(ElementName = "CfdiRelacioandos", Namespace = InvoiceConstants.NamespaceV40)]
-    [XmlArrayItem(ElementName = "CfdiRelacioando", Namespace = InvoiceConstants.NamespaceV40)]
+    [XmlArray(ElementName = "CfdiRelacioandos", Namespace = InvoiceConstants.CurrentNamespace)]
+    [XmlArrayItem(ElementName = "CfdiRelacioando", Namespace = InvoiceConstants.CurrentNamespace)]
     public List<InvoiceRelated>? InvoiceRelateds { get; set; }
 
 
@@ -154,7 +156,7 @@ public class Invoice
     /// <summary>
     /// Nodo requerido para listar los conceptos cubiertos por el comprobante.
     /// </summary>
-    [XmlArray(ElementName = "Conceptos", Namespace = InvoiceConstants.NamespaceV40)]
-    [XmlArrayItem(ElementName = "Concepto", Namespace = InvoiceConstants.NamespaceV40)]
+    [XmlArray(ElementName = "Conceptos", Namespace = InvoiceConstants.CurrentNamespace)]
+    [XmlArrayItem(ElementName = "Concepto", Namespace = InvoiceConstants.CurrentNamespace)]
     public List<InvoiceItem>? InvoiceItems { get; set; } = new();
 }

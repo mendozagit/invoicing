@@ -1,9 +1,10 @@
 ﻿using System.Xml.Serialization;
 using Invoicing.Common;
+using Invoicing.Common.Constants;
 
 namespace Invoicing.Base;
 
-[XmlType(TypeName = "Emisor", Namespace = InvoiceConstants.NamespaceV40)]
+[XmlType(TypeName = "Emisor", Namespace = InvoiceConstants.CurrentNamespace)]
 public class InvoiceIssuer
 {
     /// <summary>
