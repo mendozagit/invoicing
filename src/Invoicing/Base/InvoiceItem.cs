@@ -3,6 +3,7 @@ using Invoicing.Common;
 
 namespace Invoicing.Base;
 
+
 public class InvoiceItem
 {
     /// <summary>

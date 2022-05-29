@@ -4,7 +4,6 @@ using Invoicing.Common.Constants;
 
 namespace Invoicing.Base;
 
-[XmlType(TypeName = "Emisor", Namespace = InvoiceConstants.CurrentNamespace)]
 public class InvoiceIssuer
 {
     /// <summary>

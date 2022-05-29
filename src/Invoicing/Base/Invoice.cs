@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Xml.Schema;
+using System.Xml.Serialization;
 using Invoicing.Common;
 using Invoicing.Common.Constants;
 using Invoicing.Common.Enums;
@@ -12,7 +13,7 @@ public class Invoice
     /// Atributo requerido con valor prefijado a 4.0 que indica la versión del estándar bajo el que se encuentra expresado el comprobante.
     /// </summary>
     [XmlAttribute("Version")]
-    public string? InvoiceVersion { get; set; }
+    public InvoiceVersion InvoiceVersion { get; set; }
 
 
     /// <summary>
@@ -132,11 +133,22 @@ public class Invoice
     public string? PacConfirmation { get; set; }
 
 
+    [XmlAttribute("schemaLocation", Namespace = XmlSchema.InstanceNamespace)]
+    public string? SchemaLocation { get; set; }
+
+
+    /// <summary>
+    /// Nodo condicional para precisar la información relacionada con el comprobante global.
+    /// </summary>
+    [XmlElement(ElementName = "InformacionGlobal")]
+    public InvoiceGlobalInformation? GlobalInformation { get; set; }
+
+
     /// <summary>
     /// Nodo opcional para precisar la información de los comprobantes relacionados.
     /// </summary>
-    [XmlArray(ElementName = "CfdiRelacioandos", Namespace = InvoiceConstants.CurrentNamespace)]
-    [XmlArrayItem(ElementName = "CfdiRelacioando", Namespace = InvoiceConstants.CurrentNamespace)]
+    [XmlArray(ElementName = "CfdiRelacioandos")]
+    [XmlArrayItem(ElementName = "CfdiRelacioando")]
     public List<InvoiceRelated>? InvoiceRelateds { get; set; }
 
 
@@ -156,7 +168,7 @@ public class Invoice
     /// <summary>
     /// Nodo requerido para listar los conceptos cubiertos por el comprobante.
     /// </summary>
-    [XmlArray(ElementName = "Conceptos", Namespace = InvoiceConstants.CurrentNamespace)]
-    [XmlArrayItem(ElementName = "Concepto", Namespace = InvoiceConstants.CurrentNamespace)]
+    [XmlArray(ElementName = "Conceptos")]
+    [XmlArrayItem(ElementName = "Concepto")]
     public List<InvoiceItem>? InvoiceItems { get; set; } = new();
 }
