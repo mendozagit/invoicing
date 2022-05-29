@@ -3,7 +3,6 @@ using Invoicing.Common;
 
 namespace Invoicing.Base;
 
-
 public class InvoiceItem
 {
     /// <summary>
@@ -70,7 +69,9 @@ public class InvoiceItem
     public string? TaxObjectId { get; set; }
 
 
-
-   
-
+    /// <summary>
+    /// Nodo condicional para capturar los impuestos aplicables al presente concepto.
+    /// </summary>
+    [XmlElement("Impuestos")]
+    public InvoiceItemTaxesWrapper? ItemTaxex { get; set; }
 }

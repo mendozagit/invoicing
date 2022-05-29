@@ -171,4 +171,6 @@ public class Invoice
     [XmlArray(ElementName = "Conceptos")]
     [XmlArrayItem(ElementName = "Concepto")]
     public List<InvoiceItem>? InvoiceItems { get; set; } = new();
+
+
 }
