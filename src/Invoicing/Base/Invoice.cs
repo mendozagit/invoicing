@@ -170,7 +170,157 @@ public class Invoice
     /// </summary>
     [XmlArray(ElementName = "Conceptos")]
     [XmlArrayItem(ElementName = "Concepto")]
-    public List<InvoiceItem>? InvoiceItems { get; set; } = new();
+    public List<InvoiceItem> InvoiceItems { get; set; } = new();
 
 
+    /// <summary>
+    /// Nodo condicional para expresar el resumen de los impuestos aplicables a la factura.
+    /// </summary>
+    [XmlElement("Impuestos")]
+    public InvoiceTaxesWrapper InvoiceTaxes { get; set; } = new();
+
+
+    #region Helpers
+
+    /// <summary>
+    /// Number of decimal places in header fields
+    /// </summary>
+    [XmlIgnore]
+    public int HeaderDecimals { get; set; } = 2;
+
+    /// <summary>
+    /// Number of decimal places in items fields
+    /// </summary>
+    [XmlIgnore]
+    public int ItemsDecimals { get; set; } = 6;
+
+
+    /// <summary>
+    /// Rounding strategy used in invoice computation.
+    /// </summary>
+    [XmlIgnore]
+    public MidpointRounding RoundingStrategy { get; set; } = MidpointRounding.AwayFromZero;
+
+    public void ComputeInvoice()
+    {
+        ComputeItems();
+    }
+
+    private void ComputeItems()
+    {
+        var transferredTaxes = new List<InvoiceItemTax>();
+        var withholdingTaxes = new List<InvoiceItemTax>();
+
+        foreach (var invoiceItem in InvoiceItems)
+        {
+            invoiceItem.Amount =
+                Math.Round(invoiceItem.Quantity * invoiceItem.UnitCost, ItemsDecimals, RoundingStrategy);
+
+
+            if (invoiceItem?.ItemTaxex?.TransferredTaxes is not null)
+            {
+                foreach (var transferredTax in invoiceItem.ItemTaxex.TransferredTaxes.ToList())
+                {
+                    transferredTax.Base = Math.Round(invoiceItem.Amount, ItemsDecimals, RoundingStrategy);
+
+                    transferredTax.Amount =
+                        Math.Round(transferredTax.Base * transferredTax.TaxRate, ItemsDecimals, RoundingStrategy);
+
+
+                    transferredTaxes.Add(transferredTax);
+                }
+            }
+
+
+            if (invoiceItem?.ItemTaxex?.WithholdingTaxes is null) continue;
+            foreach (var withholdingTax in invoiceItem.ItemTaxex.WithholdingTaxes.ToList())
+            {
+                withholdingTax.Base = Math.Round(invoiceItem.Amount, ItemsDecimals, RoundingStrategy);
+
+                withholdingTax.Amount =
+                    Math.Round(withholdingTax.Base * withholdingTax.TaxRate, ItemsDecimals, RoundingStrategy);
+
+                withholdingTaxes.Add(withholdingTax);
+            }
+        }
+
+        ComputeHeader(transferredTaxes, withholdingTaxes);
+    }
+
+    private void ComputeHeader(List<InvoiceItemTax> transferredTaxes, List<InvoiceItemTax> withholdingTaxes)
+    {
+        #region Summarize Transferred Taxes
+
+        //Agrupar traslados por:  Impuesto, TasaOCuota, TipoFactor
+        var grupedTransferredTaxes = transferredTaxes.GroupBy(item => new {item.TaxId, item.TaxRate, item.TaxTypeId})
+            .Select(g => new InvoiceTax()
+            {
+                TaxId = g.Key.TaxId,
+                TaxRate = g.Key.TaxRate,
+                TaxTypeId = g.Key.TaxTypeId,
+                Base = g.Sum(x => x.Base),
+                Amount = g.Sum(x => x.Amount),
+            });
+
+
+        var groupedTransferredTaxes = grupedTransferredTaxes.ToList();
+        foreach (var grupedTransferredTax in groupedTransferredTaxes)
+        {
+            InvoiceTaxes.TransferredTaxes ??= new List<InvoiceTax>();
+
+            InvoiceTaxes.TransferredTaxes?.Add(new InvoiceTax()
+            {
+                TaxId = grupedTransferredTax.TaxId,
+                TaxTypeId = grupedTransferredTax.TaxTypeId,
+                TaxRate = grupedTransferredTax.TaxRate,
+                Base = Math.Round(grupedTransferredTax.Base, HeaderDecimals, RoundingStrategy),
+                Amount = Math.Round(grupedTransferredTax.Amount, HeaderDecimals, RoundingStrategy)
+            });
+        }
+
+
+        InvoiceTaxes.TotalTransferredTaxes =
+            Math.Round(groupedTransferredTaxes.Where(x => x.TaxRate > 0).Sum(x => x.Amount), HeaderDecimals,
+                RoundingStrategy);
+
+        #endregion
+
+
+        #region Summarize Withholding Taxes
+
+        //Agrupar retenciones por:  Impuesto, TasaOCuota, TipoFactor
+        var grupedWithholdingTaxes = withholdingTaxes.GroupBy(item => new {item.TaxId, item.TaxRate, item.TaxTypeId})
+            .Select(g => new InvoiceTax()
+            {
+                TaxId = g.Key.TaxId,
+                TaxRate = g.Key.TaxRate,
+                TaxTypeId = g.Key.TaxTypeId,
+                Base = g.Sum(x => x.Base),
+                Amount = g.Sum(x => x.Amount),
+            });
+
+
+        var groupedWithholdingsTaxes = grupedWithholdingTaxes.ToList();
+        foreach (var grupedWithholdingTax in groupedWithholdingsTaxes)
+        {
+            InvoiceTaxes.WithholdingTaxes ??= new List<InvoiceTax>();
+            InvoiceTaxes.WithholdingTaxes?.Add(new InvoiceTax()
+            {
+                TaxId = grupedWithholdingTax.TaxId,
+                TaxTypeId = grupedWithholdingTax.TaxTypeId,
+                TaxRate = grupedWithholdingTax.TaxRate,
+                Base = Math.Round(grupedWithholdingTax.Base, HeaderDecimals, RoundingStrategy),
+                Amount = Math.Round(grupedWithholdingTax.Amount, HeaderDecimals, RoundingStrategy)
+            });
+        }
+
+
+        InvoiceTaxes.TotalWithholdingTaxes =
+            Math.Round(groupedWithholdingsTaxes.Where(x => x.TaxRate > 0).Sum(x => x.Amount), HeaderDecimals,
+                RoundingStrategy);
+
+        #endregion
+    }
+
+    #endregion
 }

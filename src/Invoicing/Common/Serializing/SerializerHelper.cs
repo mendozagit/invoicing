@@ -1,4 +1,6 @@
-﻿using System.Xml;
+﻿using System.Text;
+using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Invoicing.Common.Serializing
@@ -10,108 +12,107 @@ namespace Invoicing.Common.Serializing
     /// Must have a parameterless constructor and implement <see cref="Serializable"/></typeparam>
     public class SerializerHelper
     {
-        public static XmlSerializerNamespaces EmptyNamespaces
+        public static XmlWriterSettings DefaultXmlWriterSettings
         {
-            get { return GetDefaultNamespaces(); }
+            get { return GetDefaultXmlWriterSettings(); }
         }
 
-        public static XmlWriterSettings IndentedSettings
+        public static XmlReaderSettings DefaultXmlReaderSettings
         {
-            get { return GetIndentedSettings(); }
+            get { return GetDefaultXmlReaderSettings(); }
         }
 
-        public static XmlWriterSettings NoXmlDeclarationSettings
+        public static XmlSerializerNamespaces NamespacesIE40
         {
-            get { return GetNoXmlDeclarationSettings(); }
+            get { return GetNamespacesIE40(); }
         }
 
-        public static XmlReaderSettings XmlFragmentSettings
+        public static string SchemaLocationIE40
         {
-            get { return GetReaderSettings(); }
+            get { return GetSchemaLocationIE40(); }
         }
 
-        public static XmlSerializerNamespaces INamespaces
+        public static string SchemaLocationP20
         {
-            get { return GetNamespacesIngresoV40(); }
-        }
-
-
-        public static string IESchemaLocation
-        {
-            get { return "http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd"; }
-        }
-
-        public static string PSchemaLocation
-        {
-            get
-            {
-                return "http://www.sat.gob.mx/cfd/4 " +
-                       "http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd " +
-                       "http://www.sat.gob.mx/Pagos20 " +
-                       "http://www.sat.gob.mx/sitio_internet/cfd/Pagos/Pagos20.xsd";
-            }
+            get { return GetSchemaLocationP20(); }
         }
 
         #region Private methods
 
-        private static XmlSerializerNamespaces GetDefaultNamespaces()
+        private static XmlWriterSettings GetDefaultXmlWriterSettings()
         {
-            XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
-            ns.Add("", ""); // this removes the namespaces
-            return ns;
-        }
+            var xmlWriterSettings = new XmlWriterSettings
+            {
+                Async = false,
+                CheckCharacters = true,
+                CloseOutput = false,
+                ConformanceLevel = ConformanceLevel.Document,
+                DoNotEscapeUriAttributes = false,
+                Encoding = Encoding.UTF8,
+                Indent = false,
+                IndentChars = " ",
+                NamespaceHandling = NamespaceHandling.OmitDuplicates,
+                NewLineChars = Environment.NewLine,
+                NewLineHandling = NewLineHandling.Replace,
+                NewLineOnAttributes = false,
+                OmitXmlDeclaration = false,
+                WriteEndDocumentOnClose = true
+            };
 
-        private static XmlWriterSettings GetIndentedSettings()
-        {
-            XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
-            xmlWriterSettings.Indent = true;
-            xmlWriterSettings.IndentChars = "\t";
 
             return xmlWriterSettings;
         }
 
-        private static XmlReaderSettings GetReaderSettings()
+        private static XmlReaderSettings GetDefaultXmlReaderSettings()
         {
-            XmlReaderSettings settings = new XmlReaderSettings();
-            //settings.CheckCharacters = true;
-            //settings.CloseInput = true;
-            settings.ConformanceLevel = ConformanceLevel.Fragment;
-            //settings.IgnoreComments = true;
-            //settings.IgnoreProcessingInstructions = true;
-            //settings.IgnoreWhitespace = true;
-            //settings.Schemas = new System.Xml.Schema.XmlSchemaSet();
-            //settings.
+            var settings = new XmlReaderSettings
+            {
+                Async = false,
+                CheckCharacters = true,
+                CloseInput = false,
+                ConformanceLevel = ConformanceLevel.Document,
+                DtdProcessing = DtdProcessing.Prohibit,
+                IgnoreComments = false,
+                IgnoreProcessingInstructions = false,
+                IgnoreWhitespace = false,
+                LineNumberOffset = 0,
+                LinePositionOffset = 0,
+                MaxCharactersFromEntities = 0,
+                MaxCharactersInDocument = 0,
+                NameTable = null,
+                Schemas = null,
+                ValidationFlags = XmlSchemaValidationFlags.ReportValidationWarnings,
+                ValidationType = ValidationType.None,
+                XmlResolver = null
+            };
+
 
             return settings;
         }
 
-        private static XmlWriterSettings GetNoXmlDeclarationSettings()
+
+        private static XmlSerializerNamespaces GetNamespacesIE40()
         {
-            XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
-            //xmlWriterSettings.CheckCharacters = true;
-            //xmlWriterSettings.CloseOutput = true;
-            //xmlWriterSettings.ConformanceLevel = ConformanceLevel.Auto;
-            //xmlWriterSettings.Encoding = Encoding.UTF8;
-            //xmlWriterSettings.Indent = true;
-            //xmlWriterSettings.NewLineChars = "\n";
-            //xmlWriterSettings.NewLineHandling = NewLineHandling.None;
-            //xmlWriterSettings.NewLineOnAttributes = false;
-            //xmlWriterSettings.OmitXmlDeclaration = false;
-            //xmlWriterSettings.OutputMethod = XmlOutputMethod.AutoDetect;
-
-            xmlWriterSettings.OmitXmlDeclaration = true;
-
-            return xmlWriterSettings;
-        }
-
-
-        private static XmlSerializerNamespaces GetNamespacesIngresoV40()
-        {
-            XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
+            var ns = new XmlSerializerNamespaces();
             ns.Add("cfdi", "http://www.sat.gob.mx/cfd/4");
             ns.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
             return ns;
+        }
+
+
+        private static string GetSchemaLocationIE40()
+        {
+            return "http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd";
+        }
+
+
+        private static string GetSchemaLocationP20()
+        {
+            return "http://www.sat.gob.mx/cfd/4 " +
+                   "http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd " +
+                   "http://www.sat.gob.mx/Pagos20 " +
+                   "http://www.sat.gob.mx/sitio_internet/cfd/Pagos/Pagos20.xsd";
         }
 
         #endregion
