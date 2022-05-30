@@ -1,4 +1,5 @@
-﻿using System.Xml.Schema;
+﻿using System.ComponentModel;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 using Invoicing.Common;
 using Invoicing.Common.Constants;
@@ -78,6 +79,7 @@ public class Invoice
     /// Atributo condicional para representar el importe total de los descuentos aplicables antes de impuestos. No se permiten valores negativos. Se debe registrar cuando existan conceptos con descuento.
     /// </summary>
     [XmlAttribute("Descuento")]
+    [DefaultValue(0)]
     public decimal Discount { get; set; }
 
     /// <summary>
@@ -203,10 +205,10 @@ public class Invoice
 
     public void ComputeInvoice()
     {
-        ComputeItems();
+        ComputeInvoiceInCascade();
     }
 
-    private void ComputeItems()
+    private void ComputeInvoiceInCascade()
     {
         var transferredTaxes = new List<InvoiceItemTax>();
         var withholdingTaxes = new List<InvoiceItemTax>();
@@ -318,6 +320,19 @@ public class Invoice
         InvoiceTaxes.TotalWithholdingTaxes =
             Math.Round(groupedWithholdingsTaxes.Where(x => x.TaxRate > 0).Sum(x => x.Amount), HeaderDecimals,
                 RoundingStrategy);
+
+        #endregion
+
+
+        #region Summary Totals
+
+        Discount = Math.Round(InvoiceItems.Select(x => x.Discount).Sum(), HeaderDecimals, RoundingStrategy);
+
+        Subtotal = Math.Round(InvoiceItems.Select(x => x.Amount).Sum(), HeaderDecimals, RoundingStrategy);
+        Total = Math.Round(
+            Subtotal - Discount + InvoiceTaxes.TotalTransferredTaxes - InvoiceTaxes.TotalWithholdingTaxes,
+            HeaderDecimals,
+            RoundingStrategy); //subtotal-descuentos+ impuestos trasladados -impuestos retenidos
 
         #endregion
     }
