@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.ComponentModel;
+using System.Xml.Serialization;
 using Invoicing.Common;
 
 namespace Invoicing.Base;
@@ -60,6 +61,7 @@ public class InvoiceItem
     /// Atributo opcional para representar el importe de los descuentos aplicables al concepto. No se permiten valores negativos.
     /// </summary>
     [XmlAttribute("Descuento")]
+    [DefaultValue(0)]
     public decimal Discount { get; set; }
 
     /// <summary>

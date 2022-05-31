@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace Invoicing.Base;
 
-public class InvoiceTax
+public class InvoiceTransferredTax
 {
     /// <summary>
     /// Atributo requerido para señalar la suma de los atributos Base de los conceptos del impuesto trasladado. No se permiten valores negativos.

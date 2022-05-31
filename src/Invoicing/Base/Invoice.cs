@@ -255,7 +255,7 @@ public class Invoice
 
         //Agrupar traslados por:  Impuesto, TasaOCuota, TipoFactor
         var grupedTransferredTaxes = transferredTaxes.GroupBy(item => new {item.TaxId, item.TaxRate, item.TaxTypeId})
-            .Select(g => new InvoiceTax()
+            .Select(g => new InvoiceTransferredTax()
             {
                 TaxId = g.Key.TaxId,
                 TaxRate = g.Key.TaxRate,
@@ -268,9 +268,9 @@ public class Invoice
         var groupedTransferredTaxes = grupedTransferredTaxes.ToList();
         foreach (var grupedTransferredTax in groupedTransferredTaxes)
         {
-            InvoiceTaxes.TransferredTaxes ??= new List<InvoiceTax>();
+            InvoiceTaxes.TransferredTaxes ??= new List<InvoiceTransferredTax>();
 
-            InvoiceTaxes.TransferredTaxes?.Add(new InvoiceTax()
+            InvoiceTaxes.TransferredTaxes?.Add(new InvoiceTransferredTax()
             {
                 TaxId = grupedTransferredTax.TaxId,
                 TaxTypeId = grupedTransferredTax.TaxTypeId,
@@ -292,7 +292,7 @@ public class Invoice
 
         //Agrupar retenciones por:  Impuesto, TasaOCuota, TipoFactor
         var grupedWithholdingTaxes = withholdingTaxes.GroupBy(item => new {item.TaxId, item.TaxRate, item.TaxTypeId})
-            .Select(g => new InvoiceTax()
+            .Select(g => new InvoiceTransferredTax()
             {
                 TaxId = g.Key.TaxId,
                 TaxRate = g.Key.TaxRate,
@@ -305,13 +305,10 @@ public class Invoice
         var groupedWithholdingsTaxes = grupedWithholdingTaxes.ToList();
         foreach (var grupedWithholdingTax in groupedWithholdingsTaxes)
         {
-            InvoiceTaxes.WithholdingTaxes ??= new List<InvoiceTax>();
-            InvoiceTaxes.WithholdingTaxes?.Add(new InvoiceTax()
+            InvoiceTaxes.WithholdingTaxes ??= new List<InvoiceWithholdingTax>();
+            InvoiceTaxes.WithholdingTaxes?.Add(new InvoiceWithholdingTax()
             {
                 TaxId = grupedWithholdingTax.TaxId,
-                TaxTypeId = grupedWithholdingTax.TaxTypeId,
-                TaxRate = grupedWithholdingTax.TaxRate,
-                Base = Math.Round(grupedWithholdingTax.Base, HeaderDecimals, RoundingStrategy),
                 Amount = Math.Round(grupedWithholdingTax.Amount, HeaderDecimals, RoundingStrategy)
             });
         }
