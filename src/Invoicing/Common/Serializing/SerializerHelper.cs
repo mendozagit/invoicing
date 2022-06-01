@@ -80,7 +80,6 @@ namespace Invoicing.Common.Serializing
                 MaxCharactersFromEntities = 0,
                 MaxCharactersInDocument = 0,
                 NameTable = null,
-                Schemas = null,
                 ValidationFlags = XmlSchemaValidationFlags.ReportValidationWarnings,
                 ValidationType = ValidationType.None,
                 XmlResolver = null
