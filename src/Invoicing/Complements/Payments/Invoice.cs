@@ -79,5 +79,5 @@ public class Invoice
     /// Nodo condicional para registrar los impuestos aplicables conforme al monto del pago recibido, expresados a la moneda del documento relacionado.
     /// </summary>
     [XmlElement("ImpuestosDR")]
-    public InvoiceTaxexWrapper? InvoiceTaxexWrapper { get; set; }
+    public InvoiceTaxesWrapper? InvoiceTaxesWrapper { get; set; }
 }

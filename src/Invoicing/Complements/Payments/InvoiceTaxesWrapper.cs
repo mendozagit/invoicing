@@ -5,7 +5,7 @@ namespace Invoicing.Complements.Payments;
 /// <summary>
 /// Nodo condicional para registrar los impuestos aplicables conforme al monto del pago recibido, expresados a la moneda del documento relacionado.
 /// </summary>
-public class InvoiceTaxexWrapper
+public class InvoiceTaxesWrapper
 {
 
     /// <summary>
@@ -15,6 +15,10 @@ public class InvoiceTaxexWrapper
     [XmlArrayItem("RetencionDR")]
     public List<InvoiceWithholdingTax>? WithholdingTaxes { get; set; }
 
+
+    /// <summary>
+    /// Nodo opcional para capturar los impuestos trasladados aplicables conforme al monto del pago recibido.
+    /// </summary>
     [XmlArray("TrasladosDR")]
     [XmlArrayItem("TraladoDR")]
     public List<InvoiceTransferredTax>? InvoiceTransferredTaxes { get; set; }

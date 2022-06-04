@@ -118,5 +118,5 @@ public class Payment
     /// Nodo condicional para registrar el resumen de los impuestos aplicables conforme al monto del pago recibido, expresados a la moneda de pago.
     /// </summary>
     [XmlElement("ImpuestosP")]
-    public PaymentTaxexWrapper? PaymentTaxexWrapper { get; set; }
+    public PaymentTaxesWrapper? PaymentTaxexWrapper { get; set; }
 }
