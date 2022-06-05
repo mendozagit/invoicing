@@ -36,25 +36,25 @@ public class PaymentComplement : ComputeSettings, IComputable
 
         foreach (var payment in Payments)
         {
-            //Generate payed invoice's transferred taxes
+            //Generate related invoice transferred taxes
             var invoiceTransferredTaxes = ComputeInvoiceTranferredTaxes(payment);
 
-            //Generate payed invoice's witholding taxes
+            //Generate related invoice witholding taxes
             var invoiceWitholdingTaxes = ComputeInvoiceWithholdingTaxes(payment);
 
 
-            //Generate transferred taxes from the payment from the transferred taxes on the invoice
+            //Generate payment transferred taxes from invoice transferred taxes
             ComputePaymentTranferredTaxes(payment, invoiceTransferredTaxes);
 
 
-            //Generate withholding taxes from the payment from the withholding taxes on the invoice
+            //Generate payment witholding taxes from invoice witholding taxes
             ComputePaymentWithholdingTaxes(payment, invoiceWitholdingTaxes);
         }
     }
 
 
     /// <summary>
-    /// Compute Amount field for each PaymentInvoiceTransferredTax and round decimal fields to SAT rules
+    /// Generate related invoice transferred taxes compliance SAT rules
     /// </summary>
     /// <param name="payment">payment object</param>
     /// <returns>List of PaymentInvoiceTransferredTax rounded as Mexican TA rules (SAT) </returns>
@@ -94,7 +94,7 @@ public class PaymentComplement : ComputeSettings, IComputable
 
 
     /// <summary>
-    /// Compute Amount field for each PaymentInvoiceWithholdingTax and round decimal fields to SAT rules
+    /// Generate related invoice witholding taxes compliance SAT rules
     /// </summary>
     /// <param name="payment">payment object</param>
     /// <returns>List of PaymentInvoiceWithholdingTax rounded as Mexican TA rules (SAT) </returns>
