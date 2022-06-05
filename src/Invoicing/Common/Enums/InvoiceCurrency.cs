@@ -7,6 +7,8 @@ namespace Invoicing.Common.Enums
     {
         [EnumValue("MXN")] [XmlEnum("MXN")] MXN,
 
-        [EnumValue("USD")] [XmlEnum("USD")] USD
+        [EnumValue("USD")] [XmlEnum("USD")] USD,
+
+        [EnumValue("XXX")] [XmlEnum("XXX")] XXX
     }
 }

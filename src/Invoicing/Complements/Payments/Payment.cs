@@ -111,7 +111,7 @@ public class Payment
     /// </summary>
     [XmlArray(ElementName = "DoctoRelacionado")]
     [XmlArrayItem(ElementName = "DoctoRelacionado")]
-    public List<Invoice>? Invoices { get; set; }
+    public List<PaymentInvoice>? Invoices { get; set; }
 
 
     /// <summary>

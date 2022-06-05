@@ -6,7 +6,7 @@ namespace Invoicing.Complements.Payments;
 /// <summary>
 /// Nodo requerido para asentar la información detallada de un traslado de impuesto específico conforme al monto del pago recibido.
 /// </summary>
-public class InvoiceTransferredTax
+public class PaymentInvoiceTransferredTax
 {
     /// <summary>
     /// Atributo requerido para señalar la base para el cálculo del impuesto trasladado conforme al monto del pago, aplicable al documento relacionado, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.

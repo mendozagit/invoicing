@@ -12,6 +12,12 @@ namespace Invoicing.Common.Extensions
             return dateTime.ToString(SatFormat);
         }
 
+        public static decimal ToSatRounding(this decimal value, int decimalPlaces,
+            MidpointRounding roundingStrategy = MidpointRounding.AwayFromZero)
+        {
+            return Math.Round(value, decimalPlaces, roundingStrategy);
+        }
+
 
         public static string ToValue(this Enum enumValue)
         {

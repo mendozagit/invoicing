@@ -5,7 +5,7 @@ namespace Invoicing.Complements.Payments;
 /// <summary>
 /// Nodo requerido para expresar la lista de documentos relacionados con los pagos. Por cada documento que se relacione se debe generar un nodo DoctoRelacionado.
 /// </summary>
-public class Invoice
+public class PaymentInvoice
 {
     /// <summary>
     /// Atributo requerido para expresar el identificador del documento relacionado con el pago. Este dato puede ser un Folio Fiscal de la Factura Electrónica o bien el número de operación de un documento digital.
@@ -79,5 +79,5 @@ public class Invoice
     /// Nodo condicional para registrar los impuestos aplicables conforme al monto del pago recibido, expresados a la moneda del documento relacionado.
     /// </summary>
     [XmlElement("ImpuestosDR")]
-    public InvoiceTaxesWrapper? InvoiceTaxesWrapper { get; set; }
+    public PaymentInvoiceTaxesWrapper? InvoiceTaxesWrapper { get; set; }
 }
