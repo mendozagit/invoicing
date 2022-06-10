@@ -1,6 +1,7 @@
 ﻿using System.Xml.Serialization;
 using Invoicing.Common.Constants;
 using Invoicing.Common.Contracts;
+using Invoicing.Common.Enums;
 using Invoicing.Common.Extensions;
 
 namespace Invoicing.Complements.Payments;
@@ -36,25 +37,84 @@ public class PaymentComplement : ComputeSettings, IComputable
 
         foreach (var payment in Payments)
         {
-            //Generate related invoice transferred taxes
+            //Generate related invoice's transferred taxes
             var invoiceTransferredTaxes = ComputeInvoiceTranferredTaxes(payment);
 
-            //Generate related invoice witholding taxes
+            //Generate related invoice's witholding taxes
             var invoiceWitholdingTaxes = ComputeInvoiceWithholdingTaxes(payment);
 
 
-            //Generate payment transferred taxes from invoice transferred taxes
+            //Generate payment's transferred taxes from invoice's transferred taxes
             ComputePaymentTranferredTaxes(payment, invoiceTransferredTaxes);
 
 
-            //Generate payment witholding taxes from invoice witholding taxes
+            //Generate payment's witholding taxes from invoice's witholding taxes
             ComputePaymentWithholdingTaxes(payment, invoiceWitholdingTaxes);
+
+
+            //Compute payment summary
+            ComputePaymentSummary(payment, invoiceWitholdingTaxes, invoiceTransferredTaxes);
         }
+    }
+
+    private void ComputePaymentSummary(Payment payment, List<PaymentInvoiceWithholdingTax> witholdingTaxes,
+        List<PaymentInvoiceTransferredTax> transferredTaxes)
+    {
+        var paymentSummary = new PaymentSummary();
+
+
+        paymentSummary.WithholdingIva += witholdingTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()))
+            .Select(x => x.Amount).Sum();
+
+        paymentSummary.WithholdingIsr += witholdingTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Isr.ToValue()))
+            .Select(x => x.Amount).Sum();
+
+
+        paymentSummary.WithholdingIeps += witholdingTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Ieps.ToValue()))
+            .Select(x => x.Amount).Sum();
+
+
+        paymentSummary.TransferredIva16Base += transferredTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.160000m)
+            .Select(x => x.Base).Sum();
+
+        paymentSummary.TransferredIva16 = transferredTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.160000m)
+            .Select(x => x.Amount).Sum();
+
+        paymentSummary.TransferredIva8Base += transferredTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.080000m)
+            .Select(x => x.Base).Sum();
+
+        paymentSummary.TransferredIva8 += transferredTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.080000m)
+            .Select(x => x.Amount).Sum();
+
+
+        paymentSummary.TransferredIva0Base += transferredTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.000000m)
+            .Select(x => x.Base).Sum();
+
+        paymentSummary.TransferredIva0 = transferredTaxes
+            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.000000m)
+            .Select(x => x.Amount).Sum();
+
+        paymentSummary.TransferredIvaExcento += transferredTaxes
+            .Where(x =>
+                x.TaxTypeId is not null &&
+                x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) &&
+                x.TaxTypeId.Equals(TaxType.Exento.ToValue()))
+            .Select(x => x.Amount).Sum();
+
+        paymentSummary.TotalPaymentAmount += payment.Ammount;
     }
 
 
     /// <summary>
-    /// Generate related invoice transferred taxes compliance SAT rules
+    ///  //Generate related invoice's transferred taxes compliance SAT rules
     /// </summary>
     /// <param name="payment">payment object</param>
     /// <returns>List of PaymentInvoiceTransferredTax rounded as Mexican TA rules (SAT) </returns>
@@ -94,7 +154,7 @@ public class PaymentComplement : ComputeSettings, IComputable
 
 
     /// <summary>
-    /// Generate related invoice witholding taxes compliance SAT rules
+    /// Generate related invoice's witholding taxes compliance SAT rules
     /// </summary>
     /// <param name="payment">payment object</param>
     /// <returns>List of PaymentInvoiceWithholdingTax rounded as Mexican TA rules (SAT) </returns>
@@ -132,7 +192,7 @@ public class PaymentComplement : ComputeSettings, IComputable
     }
 
     /// <summary>
-    /// Generate the tranferred taxes from the payment from the invoice's tranferred taxes
+    /// Generate payment's transferred taxes from invoice's transferred taxes compliance SAT rules
     /// </summary>
     /// <param name="payment">payment object</param>
     /// <param name="invoiceTransferredTaxes">List of invoice's transferred taxes </param>
@@ -159,7 +219,7 @@ public class PaymentComplement : ComputeSettings, IComputable
 
 
     /// <summary>
-    /// Generate the withholding taxes from the payment from the invoice's withholding taxes
+    /// Generate payment's witholding taxes from invoice's witholding taxes compliance SAT rules
     /// </summary>
     /// <param name="payment"></param>
     /// <param name="invoiceWithholdingTaxes">List of invoice's witholding taxes</param>
