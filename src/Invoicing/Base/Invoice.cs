@@ -329,6 +329,18 @@ public class Invoice : ComputeSettings, IComputable
         #endregion
     }
 
+
+    public void AddComplement(XmlElement? element)
+    {
+        Complements ??= new List<XmlElement>();
+
+        if (element is null)
+            throw new ArgumentNullException(nameof(element), "The XmlElement invoice complement cannot be null");
+
+
+        Complements.Add(element);
+    }
+
     #endregion
 
     public void Compute()

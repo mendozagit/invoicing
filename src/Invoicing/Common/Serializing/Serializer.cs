@@ -98,5 +98,35 @@ namespace Invoicing.Common.Serializing
             var xmlSerializer = new XmlSerializer(typeof(T));
             xmlSerializer.Serialize(xmlWriter, source, namespaces);
         }
+
+        /// <summary>
+        /// Used to serialize in memory the invoice complements.
+        /// </summary>
+        /// <param name="source">objectComplement</param>
+        /// <returns>complement as XmlElement</returns>
+        public static XmlElement? SerializeToXmlElement(object source)
+        {
+            var doc = new XmlDocument();
+
+            using (var writer = doc.CreateNavigator()?.AppendChild())
+            {
+                new XmlSerializer(source.GetType()).Serialize(writer!, source);
+            }
+
+            return doc.DocumentElement;
+        }
+
+        /// <summary>
+        /// Used to deserialize the invoice complements
+        /// </summary>
+        /// <typeparam name="T">target type</typeparam>
+        /// <param name="element">complement as XmlElement</param>
+        /// <returns></returns>
+        public static T? DeserializeFromXmlElement<T>(XmlElement element)
+        {
+            var serializer = new XmlSerializer(typeof(T));
+
+            return (T) serializer.Deserialize(new XmlNodeReader(element))!;
+        }
     }
 }
