@@ -20,6 +20,6 @@ public class PaymentInvoiceTaxesWrapper
     /// Nodo opcional para capturar los impuestos trasladados aplicables conforme al monto del pago recibido.
     /// </summary>
     [XmlArray("TrasladosDR")]
-    [XmlArrayItem("TraladoDR")]
+    [XmlArrayItem("TrasladoDR")]
     public List<PaymentInvoiceTransferredTax>? InvoiceTransferredTaxes { get; set; }
 }

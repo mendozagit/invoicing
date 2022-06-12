@@ -109,8 +109,8 @@ public class Payment
     /// <summary>
     /// Nodo requerido para expresar la lista de documentos relacionados con los pagos. Por cada documento que se relacione se debe generar un nodo DoctoRelacionado.
     /// </summary>
-    [XmlArray(ElementName = "DoctoRelacionado")]
-    [XmlArrayItem(ElementName = "DoctoRelacionado")]
+
+    [XmlElement("DoctoRelacionado")]
     public List<PaymentInvoice>? Invoices { get; set; }
 
 

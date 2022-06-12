@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using Invoicing.Common;
@@ -10,7 +11,7 @@ using Invoicing.Common.Extensions;
 
 namespace Invoicing.Base;
 
-[XmlRoot("Comprobante", Namespace = InvoiceConstants.CurrentInvoiceNamespace)]
+[XmlRoot("Comprobante", Namespace = InvoiceConstants.SatInvoice40Namespace)]
 public class Invoice : ComputeSettings, IComputable
 {
     /// <summary>
@@ -95,6 +96,7 @@ public class Invoice : ComputeSettings, IComputable
     /// Atributo condicional para representar el tipo de cambio FIX conforme con la moneda usada. Es requerido cuando la clave de moneda es distinta de MXN y de XXX. El valor debe reflejar el número de pesos mexicanos que equivalen a una unidad de la divisa señalada en el atributo moneda. Si el valor está fuera del porcentaje aplicable a la moneda tomado del catálogo c_Moneda, el emisor debe obtener del PAC que vaya a timbrar el CFDI, de manera no automática, una clave de confirmación para ratificar que el valor es correcto e integrar dicha clave en el atributo Confirmacion.
     /// </summary>
     [XmlAttribute("TipoCambio")]
+    [DefaultValue(0)]
     public decimal ExchangeRate { get; set; }
 
     /// <summary>
@@ -189,7 +191,7 @@ public class Invoice : ComputeSettings, IComputable
     /// Nodo opcional donde se incluye el complemento Timbre Fiscal Digital de manera obligatoria y los nodos complementarios determinados por el SAT, de acuerdo con las disposiciones particulares para un sector o actividad específica.
     /// </summary>
     [XmlElement("Complemento")]
-    public List<XmlElement>? Complements { get; set; }
+    public List<XElement>? Complements { get; set; }
 
     /// <summary>
     /// Helper property to serialize applicable supplements after stamping 
@@ -330,9 +332,9 @@ public class Invoice : ComputeSettings, IComputable
     }
 
 
-    public void AddComplement(XmlElement? element)
+    public void AddComplement(XElement? element)
     {
-        Complements ??= new List<XmlElement>();
+        Complements ??= new List<XElement>();
 
         if (element is null)
             throw new ArgumentNullException(nameof(element), "The XmlElement invoice complement cannot be null");
@@ -346,5 +348,60 @@ public class Invoice : ComputeSettings, IComputable
     public void Compute()
     {
         ComputeInvoiceInCascade();
+        RemoveUnnecessaryElements();
+    }
+
+    /// <summary>
+    /// Set properties to null based on invoice type and sat rules.
+    /// When setting null or the default value, the serializer will skip serialization instructions.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Does not exit invoice type</exception>
+    private void RemoveUnnecessaryElements()
+    {
+        switch (InvoiceTypeId)
+        {
+            case InvoiceType.Ingreso:
+                RemoveUnnecessaryElementsWhenRevenue();
+                break;
+            case InvoiceType.Egreso:
+                RemoveUnnecessaryElementsWhenCreditNote();
+                break;
+            case InvoiceType.Traslado:
+                RemoveUnnecessaryElementsWhenTransportation();
+                break;
+            case InvoiceType.Nomina:
+                RemoveUnnecessaryElementsWhenPayroll();
+                break;
+            case InvoiceType.Pago:
+                RemoveUnnecessaryElementsWhenPayment();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void RemoveUnnecessaryElementsWhenRevenue()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RemoveUnnecessaryElementsWhenCreditNote()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RemoveUnnecessaryElementsWhenTransportation()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RemoveUnnecessaryElementsWhenPayroll()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RemoveUnnecessaryElementsWhenPayment()
+    {
+        InvoiceTaxes = null;
     }
 }

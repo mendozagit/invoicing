@@ -14,16 +14,17 @@
         public const string SatPaymentObjectId = "01"; //No objeto de impuesto).;
 
 
-        public const string CurrentInvoiceNamespace = "http://www.sat.gob.mx/cfd/4";
-        public const string CurrentPaymentNamespace = "http://www.sat.gob.mx/cfd/4";
+        //public const string CurrentInvoiceNamespace = "http://www.sat.gob.mx/cfd/4";
+        //public const string CurrentPaymentNamespace = "http://www.sat.gob.mx/cfd/4";
 
-        public const string DeprecatedInvoiceNamespace = "http://www.sat.gob.mx/cfd/3";
-        public const string DeprecatedPaymentNamespace = "http://www.sat.gob.mx/cfd/3";
+        //public const string DeprecatedInvoiceNamespace = "http://www.sat.gob.mx/cfd/3";
+        //public const string DeprecatedPaymentNamespace = "http://www.sat.gob.mx/cfd/3";
 
 
         #region Namespaces and SchemaLocations
 
         public const string SatInvoiceXsiNamespace = "http://www.w3.org/2001/XMLSchema-instance";
+
         public const string SatInvoice30Namespace = "http://www.sat.gob.mx/cfd/3";
         public const string SatInvoice40Namespace = "http://www.sat.gob.mx/cfd/4";
         public const string SatPayment10Namespace = "http://www.sat.gob.mx/Pagos";

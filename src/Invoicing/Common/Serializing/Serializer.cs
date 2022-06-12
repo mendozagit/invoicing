@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
+using System.Xml.XPath;
 using Invoicing.Common.Extensions;
 
 namespace Invoicing.Common.Serializing
@@ -79,6 +81,71 @@ namespace Invoicing.Common.Serializing
             return xml;
         }
 
+        /// <summary>
+        /// Used to serialize in memory the invoice complements.
+        /// </summary>
+        /// <param name="source">objectComplement</param>
+        /// <param name="namespaces">complement namespaces</param>
+        /// <returns>complement as XmlElement</returns>
+        public static XElement? SerializeElement(object source, XmlSerializerNamespaces namespaces)
+        {
+            var doc = new XDocument();
+            var serializer = new XmlSerializer(source.GetType());
+
+            using (var writer = doc.CreateWriter())
+                serializer.Serialize(writer, source, namespaces);
+
+
+            return doc.Root?.RemoveNamespaceDeclaration();
+        }
+
+
+        //Implemented based on interface, not part of algorithm
+        public static string RemoveAllNamespaces(string xmlDocument)
+        {
+            XElement xmlDocumentWithoutNs = RemoveAllNamespaces(XElement.Parse(xmlDocument));
+
+            return xmlDocumentWithoutNs.ToString();
+        }
+
+        //Core recursion function
+        private static XElement RemoveAllNamespaces(XElement xmlDocument)
+        {
+            if (!xmlDocument.HasElements)
+            {
+                XElement xElement = new XElement(xmlDocument.Name.LocalName);
+                xElement.Value = xmlDocument.Value;
+
+                foreach (XAttribute attribute in xmlDocument.Attributes())
+                    xElement.Add(attribute);
+
+                return xElement;
+            }
+
+            return new XElement(xmlDocument.Name.LocalName,
+                xmlDocument.Elements().Select(el => RemoveAllNamespaces(el)));
+        }
+
+
+        private XElement? clenXmlDocument(XDocument doc)
+        {
+            // All elements with an empty namespace...
+            foreach (var node in doc.Root.Descendants()
+                         .Where(n => n.Name.NamespaceName == ""))
+            {
+                // Remove the xmlns='' attribute. Note the use of
+                // Attributes rather than Attribute, in case the
+                // attribute doesn't exist (which it might not if we'd
+                // created the document "manually" instead of loading
+                // it from a file.)
+                node.Attributes("xmlns").Remove();
+                // Inherit the parent namespace instead
+                node.Name = node.Parent.Name.Namespace + node.Name.LocalName;
+            }
+
+            return doc.Root;
+        }
+
 
         /// <summary>
         /// Serialize an object to a XML file
@@ -99,22 +166,6 @@ namespace Invoicing.Common.Serializing
             xmlSerializer.Serialize(xmlWriter, source, namespaces);
         }
 
-        /// <summary>
-        /// Used to serialize in memory the invoice complements.
-        /// </summary>
-        /// <param name="source">objectComplement</param>
-        /// <returns>complement as XmlElement</returns>
-        public static XmlElement? SerializeToXmlElement(object source)
-        {
-            var doc = new XmlDocument();
-
-            using (var writer = doc.CreateNavigator()?.AppendChild())
-            {
-                new XmlSerializer(source.GetType()).Serialize(writer!, source);
-            }
-
-            return doc.DocumentElement;
-        }
 
         /// <summary>
         /// Used to deserialize the invoice complements

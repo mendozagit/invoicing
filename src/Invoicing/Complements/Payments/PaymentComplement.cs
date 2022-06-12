@@ -9,9 +9,13 @@ namespace Invoicing.Complements.Payments;
 /// <summary>
 /// Complemento para el Comprobante Fiscal Digital por Internet (CFDI) para registrar información sobre la recepción de pagos. El emisor de este complemento para recepción de pagos debe ser quien las leyes le obligue a expedir comprobantes por los actos o actividades que realicen, por los ingresos que se perciban o por las retenciones de contribuciones que efectúen.
 /// </summary>
-[XmlRoot("Pagos", Namespace = InvoiceConstants.CurrentInvoiceNamespace)]
+[XmlRoot("Pagos", Namespace = InvoiceConstants.SatPayment20Namespace)]
 public class PaymentComplement : ComputeSettings, IComputable
 {
+    /// <summary>
+    /// Nodo requerido para especificar el monto total de los pagos y el total de los impuestos, deben ser expresados en MXN.
+    /// </summary>
+    [XmlElement("Totales")]
     public PaymentSummary? PaymentSummary { get; set; }
 
 
@@ -37,6 +41,11 @@ public class PaymentComplement : ComputeSettings, IComputable
 
         foreach (var payment in Payments)
         {
+            //Rouding payment invoice values to header decimal places
+
+            RoundRelatedPaymentInvoicesValues(payment);
+
+
             //Generate related invoice's transferred taxes
             var invoiceTransferredTaxes = ComputeInvoiceTranferredTaxes(payment);
 
@@ -51,10 +60,30 @@ public class PaymentComplement : ComputeSettings, IComputable
             //Generate payment's witholding taxes from invoice's witholding taxes
             ComputePaymentWithholdingTaxes(payment, invoiceWitholdingTaxes);
 
-
             //Compute payment summary
             ComputePaymentSummary(payment, invoiceWitholdingTaxes, invoiceTransferredTaxes);
+
+            RemoveUnnecessaryElements();
         }
+    }
+
+    private void RoundRelatedPaymentInvoicesValues(Payment payment)
+    {
+        if (payment.Invoices is null)
+            throw new ArgumentNullException(nameof(payment.Invoices));
+
+        foreach (var invoice in payment.Invoices)
+        {
+            invoice.PaymentAmount = invoice.PaymentAmount.ToSatRounding(HeaderDecimals, RoundingStrategy);
+            invoice.InvoiceExchangeRate = invoice.InvoiceExchangeRate.ToSatRounding(HeaderDecimals, RoundingStrategy);
+            invoice.PreviousBalanceAmount =
+                invoice.PreviousBalanceAmount.ToSatRounding(HeaderDecimals, RoundingStrategy);
+            invoice.RemainingBalance = invoice.RemainingBalance.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        }
+    }
+
+    private void RemoveUnnecessaryElements()
+    {
     }
 
     private void ComputePaymentSummary(Payment payment, List<PaymentInvoiceWithholdingTax> witholdingTaxes,
@@ -66,6 +95,7 @@ public class PaymentComplement : ComputeSettings, IComputable
         paymentSummary.WithholdingIva += witholdingTaxes
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()))
             .Select(x => x.Amount).Sum();
+
 
         paymentSummary.WithholdingIsr += witholdingTaxes
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Isr.ToValue()))
@@ -81,13 +111,16 @@ public class PaymentComplement : ComputeSettings, IComputable
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.160000m)
             .Select(x => x.Base).Sum();
 
+
         paymentSummary.TransferredIva16 = transferredTaxes
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.160000m)
             .Select(x => x.Amount).Sum();
 
+
         paymentSummary.TransferredIva8Base += transferredTaxes
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.080000m)
             .Select(x => x.Base).Sum();
+
 
         paymentSummary.TransferredIva8 += transferredTaxes
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.080000m)
@@ -95,12 +128,15 @@ public class PaymentComplement : ComputeSettings, IComputable
 
 
         paymentSummary.TransferredIva0Base += transferredTaxes
-            .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.000000m)
+            .Where(x => x.TaxTypeId != null && x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) &&
+                        x.TaxRate == 0.000000m && !x.TaxTypeId.Equals(TaxType.Exento.ToValue()))
             .Select(x => x.Base).Sum();
+
 
         paymentSummary.TransferredIva0 = transferredTaxes
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.000000m)
             .Select(x => x.Amount).Sum();
+
 
         paymentSummary.TransferredIvaExcento += transferredTaxes
             .Where(x =>
@@ -109,7 +145,33 @@ public class PaymentComplement : ComputeSettings, IComputable
                 x.TaxTypeId.Equals(TaxType.Exento.ToValue()))
             .Select(x => x.Amount).Sum();
 
-        paymentSummary.TotalPaymentAmount += payment.Ammount;
+
+        //Compute PaymentAmount from invoice's paymentAmount
+        if (payment.Invoices is not null)
+        {
+            paymentSummary.TotalPaymentAmount += payment.Invoices.Select(invoice => invoice.PaymentAmount).Sum();
+        }
+
+
+        paymentSummary.WithholdingIva = paymentSummary.WithholdingIva.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.WithholdingIsr = paymentSummary.WithholdingIsr.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.WithholdingIeps = paymentSummary.WithholdingIeps.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TransferredIva16Base =
+            paymentSummary.TransferredIva16Base.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TransferredIva16 =
+            paymentSummary.TransferredIva16.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TransferredIva8Base =
+            paymentSummary.TransferredIva8Base.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TransferredIva8 = paymentSummary.TransferredIva8.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TransferredIva0Base =
+            paymentSummary.TransferredIva0Base.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TransferredIva0 = paymentSummary.TransferredIva0.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TransferredIvaExcento =
+            paymentSummary.TransferredIvaExcento.ToSatRounding(HeaderDecimals, RoundingStrategy);
+        paymentSummary.TotalPaymentAmount =
+            paymentSummary.TotalPaymentAmount.ToSatRounding(HeaderDecimals, RoundingStrategy);
+
+        PaymentSummary = paymentSummary;
     }
 
 

@@ -30,7 +30,7 @@ public class PaymentInvoice
     /// <summary>
     /// Atributo requerido para identificar la clave de la moneda utilizada en los importes del documento relacionado, cuando se usa moneda nacional o el documento relacionado no especifica la moneda se registra MXN. Los importes registrados en los atributos “ImpSaldoAnt”, “ImpPagado” e “ImpSaldoInsoluto” de éste nodo, deben corresponder a esta moneda. Conforme con la especificación ISO 4217.
     /// </summary>
-    [XmlAttribute("ModenaDR")]
+    [XmlAttribute("MonedaDR")]
     public string? InvoiceCurrencyId { get; set; }
 
 

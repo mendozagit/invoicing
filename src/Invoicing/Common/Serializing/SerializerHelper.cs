@@ -71,7 +71,7 @@ namespace Invoicing.Common.Serializing
                     Namespaces = new XmlSerializerNamespaces();
                     Namespaces.Add("cfdi", InvoiceConstants.SatInvoice40Namespace);
                     Namespaces.Add("xsi", InvoiceConstants.SatInvoiceXsiNamespace);
-                    Namespaces.Add("Pagos20", InvoiceConstants.SatPayment20Namespace);
+                    Namespaces.Add("pago20", InvoiceConstants.SatPayment20Namespace);
                     SchemaLocation =
                         $"{InvoiceConstants.SatInvoice40Namespace} {InvoiceConstants.SatInvoice40Schema} {InvoiceConstants.SatPayment20Namespace} {InvoiceConstants.SatPayment20Schema}";
                     break;

@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using System.Xml.Linq;
+using System.Xml.Serialization;
 using Invoicing.Common.Attributes;
 
 namespace Invoicing.Common.Extensions
@@ -84,6 +86,29 @@ namespace Invoicing.Common.Extensions
 
 
             return string.IsNullOrEmpty(str) ? string.Empty : str;
+        }
+
+        /// <summary>
+        /// When a CFDI complement is serialized, the serializer adds the namespace declaration in the root of the element, however for the complements the Mexican tax authority requires that these be excluded, but keeping the prefixes of the elements.
+        /// </summary>
+        /// <param name="element">Element to remove namespace declaration</param>
+        /// <returns>Element without namespace declaration</returns>
+        public static XElement? RemoveNamespaceDeclaration(this XElement element)
+        {
+            // element.Attribute(XNamespace.Xmlns + "xsi").Remove();
+            element?.Attributes()?.Where(a => a.IsNamespaceDeclaration)?.Remove();
+            return element;
+        }
+
+
+        public static XmlSerializerNamespaces GetSerializerNamespace(this string ns, string prefix)
+        {
+            if (prefix == null)
+                throw new ArgumentNullException(nameof(prefix));
+            var xmlSerializerNamespaces = new XmlSerializerNamespaces();
+            xmlSerializerNamespaces.Add(prefix, ns);
+
+            return xmlSerializerNamespaces;
         }
     }
 }
