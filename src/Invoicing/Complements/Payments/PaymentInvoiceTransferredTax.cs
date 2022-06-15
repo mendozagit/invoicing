@@ -32,13 +32,33 @@ public class PaymentInvoiceTransferredTax
     /// Atributo condicional para señalar el valor de la tasa o cuota del impuesto que se traslada. Es requerido cuando el atributo TipoFactorDR contenga una clave que corresponda a Tasa o Cuota.
     /// </summary>
     [XmlAttribute("TasaOCuotaDR")]
-    [DefaultValue(0)]
+    //[DefaultValue(0)]
     public decimal TaxRate { get; set; }
+
+    /// <summary>
+    /// The FooSpecified property is used to control whether the Foo property must be serialized.If you always want to serialize the property, just remove the FooSpecified property.
+    /// <see>
+    ///     <cref>https://stackoverflow.com/questions/6711906/net-why-must-i-use-specified-property-to-force-serialization-is-there-a-way</cref>
+    /// </see>
+    /// </summary>
+    [XmlIgnore]
+    public bool TaxRateSpecified { get; set; } = true;
+
 
     /// <summary>
     /// Atributo condicional para señalar el importe del impuesto trasladado conforme al monto del pago, aplicable al documento relacionado. No se permiten valores negativos. Es requerido cuando el tipo factor sea Tasa o Cuota
     /// </summary>
     [XmlAttribute("ImporteDR")]
-    [DefaultValue(0)]
+    //[DefaultValue(0)]
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// The FooSpecified property is used to control whether the Foo property must be serialized.If you always want to serialize the property, just remove the FooSpecified property.
+    /// <see>
+    ///     <cref>https://stackoverflow.com/questions/6711906/net-why-must-i-use-specified-property-to-force-serialization-is-there-a-way</cref>
+    /// </see>
+    /// </summary>
+    [XmlIgnore]
+    public bool AmountSpecified { get; set; } = true;
+
 }

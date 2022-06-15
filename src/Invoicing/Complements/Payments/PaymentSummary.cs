@@ -82,13 +82,16 @@ public class PaymentSummary
     [DefaultValue(0)]
     public decimal TransferredIva0 { get; set; }
 
+
+
+  
+
     /// <summary>
     /// Atributo condicional para expresar el total de la base de IVA trasladado exento que se desprende de los pagos. No se permiten valores negativos.
     /// </summary>
-    //public decimal TransferredIvaExcentoBase { get; set; }
     [XmlAttribute("TotalTrasladosBaseIVAExento")]
     [DefaultValue(0)]
-    public decimal TransferredIvaExcento { get; set; }
+    public decimal TransferredIvaExcentoBase { get; set; }
 
     /// <summary>
     /// Atributo requerido para expresar el total de los pagos que se desprenden de los nodos Pago. No se permiten valores negativos.

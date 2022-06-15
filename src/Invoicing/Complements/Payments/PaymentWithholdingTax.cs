@@ -21,4 +21,13 @@ public class PaymentWithholdingTax
     [XmlAttribute("ImporteP")]
     [DefaultValue(0)]
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// The FooSpecified property is used to control whether the Foo property must be serialized.If you always want to serialize the property, just remove the FooSpecified property.
+    /// <see>
+    ///     <cref>https://stackoverflow.com/questions/6711906/net-why-must-i-use-specified-property-to-force-serialization-is-there-a-way</cref>
+    /// </see>
+    /// </summary>
+    [XmlIgnore]
+    public bool AmountSpecified { get; set; } = true;
 }

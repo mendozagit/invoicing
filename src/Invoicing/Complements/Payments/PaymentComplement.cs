@@ -132,18 +132,20 @@ public class PaymentComplement : ComputeSettings, IComputable
                         x.TaxRate == 0.000000m && !x.TaxTypeId.Equals(TaxType.Exento.ToValue()))
             .Select(x => x.Base).Sum();
 
-
+        //The base field is used Amount instead of the base because the rate is zero but is not 'Exento', is VAT 0.
         paymentSummary.TransferredIva0 = transferredTaxes
             .Where(x => x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) && x.TaxRate == 0.000000m)
             .Select(x => x.Amount).Sum();
 
 
-        paymentSummary.TransferredIvaExcento += transferredTaxes
+        //The base field is used instead of the amount because the rate is zero for both exempt and VAT0.
+        //If the amount field is used, it will always generate a zero as the total, and the [DefaultValue(0)] attribute will omit this attribute during serialization.
+        paymentSummary.TransferredIvaExcentoBase += transferredTaxes
             .Where(x =>
                 x.TaxTypeId is not null &&
                 x.TaxId is not null && x.TaxId.Equals(Tax.Iva.ToValue()) &&
                 x.TaxTypeId.Equals(TaxType.Exento.ToValue()))
-            .Select(x => x.Amount).Sum();
+            .Select(x => x.Base).Sum();
 
 
         //Compute PaymentAmount from invoice's paymentAmount
@@ -166,8 +168,10 @@ public class PaymentComplement : ComputeSettings, IComputable
         paymentSummary.TransferredIva0Base =
             paymentSummary.TransferredIva0Base.ToSatRounding(HeaderDecimals, RoundingStrategy);
         paymentSummary.TransferredIva0 = paymentSummary.TransferredIva0.ToSatRounding(HeaderDecimals, RoundingStrategy);
-        paymentSummary.TransferredIvaExcento =
-            paymentSummary.TransferredIvaExcento.ToSatRounding(HeaderDecimals, RoundingStrategy);
+
+
+        paymentSummary.TransferredIvaExcentoBase =
+            paymentSummary.TransferredIvaExcentoBase.ToSatRounding(HeaderDecimals, RoundingStrategy);
         paymentSummary.TotalPaymentAmount =
             paymentSummary.TotalPaymentAmount.ToSatRounding(HeaderDecimals, RoundingStrategy);
 
@@ -205,6 +209,14 @@ public class PaymentComplement : ComputeSettings, IComputable
 
                 paymentInvoiceTransferredTax.Amount =
                     paymentInvoiceTransferredTax.Amount.ToSatRounding(ItemsDecimals, RoundingStrategy);
+
+                //Only 'Exento' taxes (transferred or withheld) must omit TaxRate(TasaOCuota) and Amount(Importe) attributes during serialization proccess
+                if (paymentInvoiceTransferredTax.TaxTypeId != null &&
+                    paymentInvoiceTransferredTax.TaxTypeId.Equals(TaxType.Exento.ToValue()))
+                {
+                    paymentInvoiceTransferredTax.TaxRateSpecified = false;
+                    paymentInvoiceTransferredTax.AmountSpecified = false;
+                }
 
                 paymentInvoiceTransferredTaxes.Add(paymentInvoiceTransferredTax);
             }
@@ -245,6 +257,14 @@ public class PaymentComplement : ComputeSettings, IComputable
                 paymentInvoiceWithholdingTax.Amount =
                     paymentInvoiceWithholdingTax.Amount.ToSatRounding(ItemsDecimals, RoundingStrategy);
 
+                //Only 'Exento' taxes (transferred or withheld) must omit TaxRate(TasaOCuota) and Amount(Importe) attributes during serialization proccess
+                if (paymentInvoiceWithholdingTax.TaxTypeId != null &&
+                    paymentInvoiceWithholdingTax.TaxTypeId.Equals(TaxType.Exento.ToValue()))
+                {
+                    paymentInvoiceWithholdingTax.TaxRateSpecified = false;
+                    paymentInvoiceWithholdingTax.AmountSpecified = false;
+                }
+
                 paymentInvoiceWithholdingTaxes.Add(paymentInvoiceWithholdingTax);
             }
         }
@@ -275,6 +295,15 @@ public class PaymentComplement : ComputeSettings, IComputable
                 TaxRate = invoiceTransferredTax.TaxRate,
                 Amount = invoiceTransferredTax.Amount
             };
+            //Only 'Exento' taxes (transferred or withheld) must omit TaxRate(TasaOCuota) and Amount(Importe) attributes during serialization proccess
+            if (paymentTransferredTax.TaxTypeId != null &&
+                paymentTransferredTax.TaxTypeId.Equals(TaxType.Exento.ToValue()))
+            {
+                paymentTransferredTax.TaxRateSpecified = false;
+                paymentTransferredTax.AmountSpecified = false;
+            }
+
+
             payment.PaymentTaxexWrapper.PaymentTransferredTaxes.Add(paymentTransferredTax);
         }
     }
@@ -298,6 +327,8 @@ public class PaymentComplement : ComputeSettings, IComputable
                 TaxId = invoiceWithholdingTax.TaxId,
                 Amount = invoiceWithholdingTax.Amount
             };
+
+
             payment.PaymentTaxexWrapper.PaymentWithholdingTaxes.Add(paymentWithholdingTax);
         }
     }
