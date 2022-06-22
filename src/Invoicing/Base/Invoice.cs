@@ -154,9 +154,8 @@ public class Invoice : ComputeSettings, IComputable
     /// <summary>
     /// Nodo opcional para precisar la información de los comprobantes relacionados.
     /// </summary>
-    [XmlArray(ElementName = "CfdiRelacioandos")]
-    [XmlArrayItem(ElementName = "CfdiRelacioando")]
-    public List<InvoiceRelated>? InvoiceRelateds { get; set; }
+    [XmlElement(ElementName = "CfdiRelacionados")]
+    public InvoiceRelatedWrapper? RelatedInvoiceWrapper { get; set; }
 
 
     /// <summary>
@@ -382,12 +381,12 @@ public class Invoice : ComputeSettings, IComputable
 
     private void RemoveUnnecessaryElementsWhenRevenue()
     {
-        throw new NotImplementedException();
+        
     }
 
     private void RemoveUnnecessaryElementsWhenCreditNote()
     {
-        throw new NotImplementedException();
+        
     }
 
     private void RemoveUnnecessaryElementsWhenTransportation()
