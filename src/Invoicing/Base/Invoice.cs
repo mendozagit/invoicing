@@ -8,11 +8,12 @@ using Invoicing.Common.Constants;
 using Invoicing.Common.Contracts;
 using Invoicing.Common.Enums;
 using Invoicing.Common.Extensions;
+using Invoicing.Contracts;
 
 namespace Invoicing.Base;
 
 [XmlRoot("Comprobante", Namespace = InvoiceConstants.SatInvoice40Namespace)]
-public class Invoice : ComputeSettings, IComputable
+public class Invoice : ComputeSettings, IComputable, IInvoice
 {
     /// <summary>
     /// Atributo requerido con valor prefijado a 4.0 que indica la versión del estándar bajo el que se encuentra expresado el comprobante.
