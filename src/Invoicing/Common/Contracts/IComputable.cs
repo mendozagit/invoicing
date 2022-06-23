@@ -1,6 +1,4 @@
-﻿using System.Xml.Serialization;
-
-namespace Invoicing.Common.Contracts;
+﻿namespace Invoicing.Common.Contracts;
 
 public interface IComputable
 {

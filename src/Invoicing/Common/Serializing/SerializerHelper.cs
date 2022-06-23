@@ -1,7 +1,4 @@
-﻿using System.Text;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using Invoicing.Common.Constants;
 using Invoicing.Common.Enums;
 

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Xml.Serialization;
-using Invoicing.Common;
 
 namespace Invoicing.Base;
 

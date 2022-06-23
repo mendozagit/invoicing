@@ -2,7 +2,7 @@
 using Invoicing.Base;
 using Invoicing.Common.Enums;
 
-namespace Invoicing.Contracts;
+namespace Invoicing.Common.Contracts;
 
 public interface IInvoice
 {

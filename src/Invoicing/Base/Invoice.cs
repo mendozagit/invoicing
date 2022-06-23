@@ -1,14 +1,11 @@
 ﻿using System.ComponentModel;
-using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using Invoicing.Common;
 using Invoicing.Common.Constants;
 using Invoicing.Common.Contracts;
 using Invoicing.Common.Enums;
 using Invoicing.Common.Extensions;
-using Invoicing.Contracts;
 
 namespace Invoicing.Base;
 
