@@ -116,6 +116,10 @@ public class InvoiceItem
         ItemTaxex.TransferredTaxes.Add(transferredTax);
     }
 
+    /// <summary>
+    /// Add withholding tax to current invoice item.
+    /// </summary>
+    /// <param name="itemTax">withholding tax object</param>
     public void AddWithholdingTax(InvoiceItemTax itemTax)
     {
         ItemTaxex ??= new InvoiceItemTaxesWrapper();
