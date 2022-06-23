@@ -20,16 +20,6 @@ public class InvoiceService : IComputable
     /// <summary>
     /// Add invoiceItem to current invoice object
     /// </summary>
-    /// <param name="invoiceItem">invoice item to be added</param>
-    public void AddInvoiceItem(InvoiceItem invoiceItem)
-    {
-        //_invoice.InvoiceItems ??= new List<InvoiceItem>();
-        invoice.InvoiceItems.Add(invoiceItem);
-    }
-
-    /// <summary>
-    /// Add invoiceItem to current invoice object
-    /// </summary>
     /// <param name="satItemId">ClaveProdServ:Atributo requerido para expresar la clave del producto o del servicio amparado por el presente concepto. Es requerido y deben utilizar las claves del catálogo de productos y servicios, cuando los conceptos que registren por sus actividades correspondan con dichos conceptos.</param>
     /// <param name="itemId">NoIdentificacion:Atributo opcional para expresar el número de parte, identificador del producto o del servicio, la clave de producto o servicio, SKU o equivalente, propia de la operación del emisor, amparado por el presente concepto. Opcionalmente se puede utilizar claves del estándar GTIN.</param>
     /// <param name="quantity">Cantidad:Atributo requerido para precisar la cantidad de bienes o servicios del tipo particular definido por el presente concepto.</param>
@@ -66,6 +56,30 @@ public class InvoiceService : IComputable
             TaxObjectId = taxObjectId
         };
         invoice.InvoiceItems.Add(invoiceItem);
+    }
+
+    /// <summary>
+    /// Add invoiceItem to current invoice object
+    /// </summary>
+    /// <param name="invoiceItem">invoice item to be added</param>
+    public void AddInvoiceItem(InvoiceItem invoiceItem)
+    {
+        //_invoice.InvoiceItems ??= new List<InvoiceItem>();
+        invoice.InvoiceItems.Add(invoiceItem);
+    }
+
+    /// <summary>
+    /// Add invoiceItems to current invoice object
+    /// </summary>
+    /// <param name="invoiceItems"></param>
+    /// <exception cref="ArgumentNullException">invoiceItems</exception>
+    public void AddInvoiceItems(List<InvoiceItem> invoiceItems)
+    {
+        if (!invoiceItems.Any())
+            throw new ArgumentNullException(nameof(invoiceItems),
+                "The list of items on the invoice must contain at least one item");
+
+        invoice.InvoiceItems.AddRange(invoiceItems);
     }
 
 
