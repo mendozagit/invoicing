@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace Invoicing.Base
 {
-    public class InvoiceTaxesWrapper
+    public sealed class InvoiceTaxesWrapper
     {
         /// <summary>
         /// Atributo condicional para expresar el total de los impuestos retenidos que se desprenden de los conceptos expresados en el comprobante fiscal digital por Internet. No se permiten valores negativos. Es requerido cuando en los conceptos se registren impuestos retenidos.

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Invoicing.Servicies
 {
-    public class CreditNoteService
+    public class CreditNoteService : InvoiceService
     {
+
     }
 }

@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace Invoicing.Base;
 
-public class InvoiceItem
+public sealed class InvoiceItem
 {
     /// <summary>
     /// Atributo requerido para expresar la clave del producto o del servicio amparado por el presente concepto. Es requerido y deben utilizar las claves del catálogo de productos y servicios, cuando los conceptos que registren por sus actividades correspondan con dichos conceptos.

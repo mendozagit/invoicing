@@ -2,8 +2,8 @@
 
 namespace Invoicing.Base
 {
-   
-    public class InvoiceItemTaxesWrapper
+
+    public sealed class InvoiceItemTaxesWrapper
     {
         /// <summary>
         /// Nodo opcional para asentar los impuestos trasladados aplicables al presente concepto.

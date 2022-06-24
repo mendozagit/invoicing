@@ -6,7 +6,7 @@ namespace Invoicing.Base
     /// <summary>
     /// Nodo requerido para la información detallada de una retención de impuesto específico.
     /// </summary>
-    public class InvoiceWithholdingTax
+    public sealed class InvoiceWithholdingTax
     {
         /// <summary>
         /// Atributo requerido para señalar la clave del tipo de impuesto retenido.

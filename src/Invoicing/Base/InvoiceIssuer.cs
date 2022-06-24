@@ -2,7 +2,7 @@
 
 namespace Invoicing.Base;
 
-public class InvoiceIssuer
+public sealed class InvoiceIssuer
 {
     /// <summary>
     /// Atributo requerido para registrar la Clave del Registro Federal de Contribuyentes correspondiente al contribuyente emisor del comprobante.

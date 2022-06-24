@@ -5,7 +5,7 @@ namespace Invoicing.Base;
 /// <summary>
 /// Nodo requerido para precisar la información de los comprobantes relacionados.
 /// </summary>
-public class InvoiceRelated
+public sealed class InvoiceRelated
 {
     /// <summary>
     /// Atributo requerido para registrar el folio fiscal (UUID) de un CFDI relacionado con el presente comprobante,

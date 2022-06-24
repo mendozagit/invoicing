@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace Invoicing.Base;
 
-public class InvoiceItemTax
+public sealed class InvoiceItemTax
 {
     /// <summary>
     /// Atributo requerido para señalar la base para el cálculo del impuesto, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.

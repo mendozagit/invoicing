@@ -145,6 +145,92 @@ public class InvoiceService : IComputable
         _invoice.Compute();
     }
 
+    /// <summary>
+    /// Nodo requerido para expresar la información del contribuyente emisor del comprobante.
+    /// </summary>
+    /// <param name="invoiceIssuer">issuer object to be added to the invoice</param>
+    public void AddIssuer(InvoiceIssuer invoiceIssuer)
+    {
+        _invoice.InvoiceIssuer = invoiceIssuer;
+    }
+
+    /// <summary>
+    /// Nodo requerido para expresar la información del contribuyente emisor del comprobante.
+    /// </summary>
+    /// <param name="tin">RFC:Atributo requerido para registrar la Clave del Registro Federal de Contribuyentes correspondiente al contribuyente emisor del comprobante.</param>
+    /// <param name="legalName">RazonSocial:Atributo requerido para registrar el nombre, denominación o razón social del contribuyente inscrito en el RFC, del emisor del comprobante.</param>
+    /// <param name="taxRegimeId">RegimenFiscalId:Atributo requerido para incorporar la clave del régimen del contribuyente emisor al que aplicará el efecto fiscal de este comprobante.</param>
+    /// <param name="operationNumber">FacAtrAdquirente:Atributo condicional para expresar el número de operación proporcionado por el SAT cuando se trate de un comprobante a través de un PCECFDI o un PCGCFDISP.</param>
+    public void AddIssuer(string tin, string legalName, string taxRegimeId, string operationNumber)
+    {
+        var invoiceIssuer = new InvoiceIssuer
+        {
+            Tin = tin,
+            LegalName = legalName,
+            TaxRegimeId = taxRegimeId,
+            OperationNumber = operationNumber
+        };
+
+        _invoice.InvoiceIssuer = invoiceIssuer;
+    }
+
+    public void AddRecipient(InvoiceRecipient invoiceRecipient)
+    {
+        _invoice.InvoiceRecipient = invoiceRecipient;
+    }
+
+    /// <summary>
+    /// Nodo requerido para precisar la información del contribuyente receptor del comprobante
+    /// </summary>
+    /// <param name="tin">RFC:Atributo requerido para registrar la Clave del Registro Federal de Contribuyentes correspondiente al contribuyente receptor del comprobante.</param>
+    /// <param name="legalName">RazonSocial:Atributo requerido para registrar el nombre(s), primer apellido, segundo apellido, según corresponda, denominación o razón social del contribuyente, inscrito en el RFC, del receptor del comprobante.</param>
+    /// <param name="zipCode">Atributo requerido para registrar el código postal del domicilio fiscal del receptor del comprobante.</param>
+    /// <param name="taxRegimeId">Atributo requerido para incorporar la clave del régimen fiscal del contribuyente receptor al que aplicará el efecto fiscal de este comprobante.</param>
+    /// <param name="cfdiUseId">Atributo requerido para expresar la clave del uso que dará a esta factura el receptor del CFDI.</param>
+    /// <param name="foreignCountryId">Atributo condicional para registrar la clave del país de residencia para efectos fiscales del receptor del comprobante, cuando se trate de un extranjero, y que es conforme con la especificación ISO 3166-1 alpha-3. Es requerido cuando se incluya el complemento de comercio exterior o se registre el atributo NumRegIdTrib.</param>
+    /// <param name="foreignTin">Atributo condicional para expresar el número de registro de identidad fiscal del receptor cuando sea residente en el extranjero. Es requerido cuando se incluya el complemento de comercio exterior.</param>
+    public void AddRecipient(string tin,
+        string legalName,
+        string zipCode,
+        string taxRegimeId,
+        string cfdiUseId,
+        string? foreignCountryId = null,
+        string? foreignTin = null)
+    {
+        var invoiceRecipient = new InvoiceRecipient
+        {
+            Tin = foreignTin,
+            LegalName = legalName,
+            ZipCode = zipCode,
+            TaxRegimeId = taxRegimeId,
+            CfdiUseId = cfdiUseId,
+            ForeignCountryId = foreignCountryId,
+            ForeignTin = foreignTin
+        };
+        _invoice.InvoiceRecipient = invoiceRecipient;
+    }
+
+    /// <summary>
+    /// Nodo condicional para precisar la información relacionada con el comprobante global.
+    /// </summary>
+    /// <param name="globalInformation"></param>
+    public void AddGlobalInformation(InvoiceGlobalInformation globalInformation)
+    {
+        _invoice.GlobalInformation = globalInformation;
+    }
+
+    public void AddGlobalInformation(string periodicity, string month, int year)
+    {
+        var globalInformation = new InvoiceGlobalInformation
+        {
+            Periodicity = periodicity,
+            Month = month,
+            Year = year
+        };
+        _invoice.GlobalInformation = globalInformation;
+    }
+
+
     #region Properties
 
     private InvoiceVersion _invoiceVersion;

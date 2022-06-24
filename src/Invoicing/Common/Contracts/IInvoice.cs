@@ -4,7 +4,7 @@ using Invoicing.Common.Enums;
 
 namespace Invoicing.Common.Contracts;
 
-public interface IInvoice
+internal interface IInvoice
 {
     /// <summary>
     /// Atributo requerido con valor prefijado a 4.0 que indica la versión del estándar bajo el que se encuentra expresado el comprobante.
@@ -131,7 +131,7 @@ public interface IInvoice
     /// <summary>
     /// Nodo condicional para expresar el resumen de los impuestos aplicables a la factura.
     /// </summary>
-    InvoiceTaxesWrapper InvoiceTaxes { get; set; }
+    InvoiceTaxesWrapper? InvoiceTaxes { get; set; }
 
     /// <summary>
     /// Nodo opcional donde se incluye el complemento Timbre Fiscal Digital de manera obligatoria y los nodos complementarios determinados por el SAT, de acuerdo con las disposiciones particulares para un sector o actividad específica.

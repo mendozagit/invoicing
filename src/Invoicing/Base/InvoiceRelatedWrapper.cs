@@ -5,7 +5,7 @@ namespace Invoicing.Base
     /// <summary>
     /// Nodo opcional para precisar la información de los comprobantes relacionados. (nota de credito)
     /// </summary>
-    public class InvoiceRelatedWrapper
+    public sealed class InvoiceRelatedWrapper
     {
         /// <summary>
         /// Nodo requerido para precisar la información de los comprobantes relacionados.

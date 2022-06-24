@@ -10,7 +10,7 @@ using Invoicing.Common.Extensions;
 namespace Invoicing.Base;
 
 [XmlRoot("Comprobante", Namespace = InvoiceConstants.SatInvoice40Namespace)]
-public class Invoice : ComputeSettings, IComputable, IInvoice
+public sealed class Invoice : ComputeSettings, IComputable, IInvoice
 {
     /// <summary>
     /// Atributo requerido con valor prefijado a 4.0 que indica la versión del estándar bajo el que se encuentra expresado el comprobante.
@@ -181,7 +181,7 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
     /// Nodo condicional para expresar el resumen de los impuestos aplicables a la factura.
     /// </summary>
     [XmlElement("Impuestos")]
-    public InvoiceTaxesWrapper InvoiceTaxes { get; set; } = new();
+    public InvoiceTaxesWrapper? InvoiceTaxes { get; set; } = new();
 
 
     /// <summary>
@@ -248,7 +248,7 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
         #region Summarize Transferred Taxes
 
         //Agrupar traslados por:  Impuesto, TasaOCuota, TipoFactor
-        var grupedTransferredTaxes = transferredTaxes.GroupBy(item => new {item.TaxId, item.TaxRate, item.TaxTypeId})
+        var grupedTransferredTaxes = transferredTaxes.GroupBy(item => new { item.TaxId, item.TaxRate, item.TaxTypeId })
             .Select(g => new InvoiceTransferredTax()
             {
                 TaxId = g.Key.TaxId,
@@ -262,6 +262,8 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
         var groupedTransferredTaxes = grupedTransferredTaxes.ToList();
         foreach (var grupedTransferredTax in groupedTransferredTaxes)
         {
+            InvoiceTaxes ??= new InvoiceTaxesWrapper();
+
             InvoiceTaxes.TransferredTaxes ??= new List<InvoiceTransferredTax>();
 
             InvoiceTaxes.TransferredTaxes?.Add(new InvoiceTransferredTax()
@@ -274,7 +276,7 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
             });
         }
 
-
+        InvoiceTaxes ??= new InvoiceTaxesWrapper();
         InvoiceTaxes.TotalTransferredTaxes =
             Math.Round(groupedTransferredTaxes.Where(x => x.TaxRate > 0).Sum(x => x.Amount), HeaderDecimals,
                 RoundingStrategy);
@@ -285,7 +287,7 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
         #region Summarize Withholding Taxes
 
         //Agrupar retenciones por:  Impuesto, TasaOCuota, TipoFactor
-        var grupedWithholdingTaxes = withholdingTaxes.GroupBy(item => new {item.TaxId, item.TaxRate, item.TaxTypeId})
+        var grupedWithholdingTaxes = withholdingTaxes.GroupBy(item => new { item.TaxId, item.TaxRate, item.TaxTypeId })
             .Select(g => new InvoiceTransferredTax()
             {
                 TaxId = g.Key.TaxId,
@@ -299,6 +301,7 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
         var groupedWithholdingsTaxes = grupedWithholdingTaxes.ToList();
         foreach (var grupedWithholdingTax in groupedWithholdingsTaxes)
         {
+            InvoiceTaxes ??= new InvoiceTaxesWrapper();
             InvoiceTaxes.WithholdingTaxes ??= new List<InvoiceWithholdingTax>();
             InvoiceTaxes.WithholdingTaxes?.Add(new InvoiceWithholdingTax()
             {
@@ -307,7 +310,7 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
             });
         }
 
-
+        InvoiceTaxes ??= new InvoiceTaxesWrapper();
         InvoiceTaxes.TotalWithholdingTaxes =
             Math.Round(groupedWithholdingsTaxes.Where(x => x.TaxRate > 0).Sum(x => x.Amount), HeaderDecimals,
                 RoundingStrategy);
@@ -379,12 +382,10 @@ public class Invoice : ComputeSettings, IComputable, IInvoice
 
     private void RemoveUnnecessaryElementsWhenRevenue()
     {
-        
     }
 
     private void RemoveUnnecessaryElementsWhenCreditNote()
     {
-        
     }
 
     private void RemoveUnnecessaryElementsWhenTransportation()
