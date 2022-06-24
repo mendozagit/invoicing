@@ -92,6 +92,7 @@ public class InvoiceItem
 
     /// <summary>
     /// Add transferred tax to current invoice item.
+    /// Manually calculated
     /// </summary>
     /// <param name="pbase">Base:Atributo requerido para señalar la base para el cálculo del impuesto, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.</param>
     /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
@@ -116,6 +117,30 @@ public class InvoiceItem
     }
 
     /// <summary>
+    /// Add transferred tax to current invoice item.
+    /// Self-calculating
+    /// </summary>
+    /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
+    /// <param name="taxTypeId">TipoFactor:|Tasa|Cuota|Exento|:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+    /// <param name="taxRate">TasaOCuota:Atributo condicional para señalar el valor de la tasa o cuota del impuesto que se traslada para el presente concepto. Es requerido cuando el atributo TipoFactor tenga una clave que corresponda a Tasa o Cuota.</param>
+    public void AddTransferredTax(string taxId, string taxTypeId, decimal taxRate=0)
+    {
+        ItemTaxex ??= new InvoiceItemTaxesWrapper();
+        ItemTaxex.TransferredTaxes ??= new List<InvoiceItemTax>();
+
+        var transferredTax = new InvoiceItemTax
+        {
+            Base = Quantity * UnitCost,
+            TaxId = taxId,
+            TaxTypeId = taxTypeId,
+            TaxRate = taxRate,
+            Amount = Quantity * UnitCost * taxRate
+        };
+
+        ItemTaxex.TransferredTaxes.Add(transferredTax);
+    }
+
+    /// <summary>
     /// Add withholding tax to current invoice item.
     /// </summary>
     /// <param name="itemTax">withholding tax object</param>
@@ -128,6 +153,7 @@ public class InvoiceItem
 
     /// <summary>
     /// Add withholding tax to current invoice item.
+    /// Manually calculated
     /// </summary>
     /// <param name="pbase">Base:Atributo requerido para señalar la base para el cálculo de la retención, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.</param>
     /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
@@ -150,6 +176,31 @@ public class InvoiceItem
 
         ItemTaxex.WithholdingTaxes.Add(transferredTax);
     }
+
+    /// <summary>
+    /// Add withholding tax to current invoice item.
+    /// Self-calculating
+    /// </summary>
+    /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
+    /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+    /// <param name="taxRate">TasaOCuota:Atributo requerido para señalar la tasa o cuota del impuesto que se retiene para el presente concepto.</param>
+    public void AddWithholdingTax(string taxId, string taxTypeId, decimal taxRate)
+    {
+        ItemTaxex ??= new InvoiceItemTaxesWrapper();
+        ItemTaxex.WithholdingTaxes ??= new List<InvoiceItemTax>();
+
+        var transferredTax = new InvoiceItemTax
+        {
+            Base = Quantity * UnitCost,
+            TaxId = taxId,
+            TaxTypeId = taxTypeId,
+            TaxRate = taxRate,
+            Amount = Quantity * UnitCost * taxRate
+        };
+
+        ItemTaxex.WithholdingTaxes.Add(transferredTax);
+    }
+
 
     #endregion
 }

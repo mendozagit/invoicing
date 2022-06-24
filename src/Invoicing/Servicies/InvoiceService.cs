@@ -2,6 +2,7 @@
 using System.Xml;
 using Invoicing.Base;
 using Invoicing.Common.Contracts;
+using Invoicing.Common.Enums;
 using Invoicing.Common.Extensions;
 using Invoicing.Common.Serializing;
 
@@ -9,11 +10,11 @@ namespace Invoicing.Servicies;
 
 public class InvoiceService : IComputable
 {
-    private readonly Invoice invoice;
+    public Invoice Invoice { get; }
 
     public InvoiceService()
     {
-        invoice = new Invoice();
+        Invoice = new Invoice();
     }
 
 
@@ -55,7 +56,9 @@ public class InvoiceService : IComputable
             Discount = discount,
             TaxObjectId = taxObjectId
         };
-        invoice.InvoiceItems.Add(invoiceItem);
+
+
+        Invoice.InvoiceItems.Add(invoiceItem);
     }
 
     /// <summary>
@@ -65,7 +68,7 @@ public class InvoiceService : IComputable
     public void AddInvoiceItem(InvoiceItem invoiceItem)
     {
         //_invoice.InvoiceItems ??= new List<InvoiceItem>();
-        invoice.InvoiceItems.Add(invoiceItem);
+        Invoice.InvoiceItems.Add(invoiceItem);
     }
 
     /// <summary>
@@ -79,7 +82,7 @@ public class InvoiceService : IComputable
             throw new ArgumentNullException(nameof(invoiceItems),
                 "The list of items on the invoice must contain at least one item");
 
-        invoice.InvoiceItems.AddRange(invoiceItems);
+        Invoice.InvoiceItems.AddRange(invoiceItems);
     }
 
 
@@ -102,12 +105,13 @@ public class InvoiceService : IComputable
             Encoding = Encoding.UTF8,
             Indent = true
         };
-        Serializer<Invoice>.SerializeToFile(invoice, filePath, SerializerHelper.Namespaces, settings);
+        Serializer<Invoice>.SerializeToFile(Invoice, filePath, SerializerHelper.Namespaces, settings);
     }
 
 
     /// <summary>
     /// Serializes the current invoice and writes it to memory stream
+    /// Compute()?
     /// </summary>
     /// <returns>xml invoice as string</returns>
     public string SerializeToString()
@@ -120,7 +124,7 @@ public class InvoiceService : IComputable
             Encoding = Encoding.UTF8,
             Indent = false
         };
-        var xml = Serializer<Invoice>.Serialize(invoice, SerializerHelper.Namespaces, settings);
+        var xml = Serializer<Invoice>.Serialize(Invoice, SerializerHelper.Namespaces, settings);
 
         return xml.Clean();
     }
@@ -137,6 +141,6 @@ public class InvoiceService : IComputable
     /// </summary>
     public void Compute()
     {
-        invoice.Compute();
+        Invoice.Compute();
     }
 }
