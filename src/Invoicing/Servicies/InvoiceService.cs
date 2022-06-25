@@ -1,8 +1,11 @@
 ﻿using System.Text;
 using System.Xml;
+using Credencials.Common;
+using Credencials.Core;
 using Invoicing.Base;
 using Invoicing.Common.Contracts;
 using Invoicing.Common.Enums;
+using Invoicing.Common.Exceptions;
 using Invoicing.Common.Extensions;
 using Invoicing.Common.Serializing;
 
@@ -16,6 +19,14 @@ public class InvoiceService : IComputable
     public InvoiceService()
     {
         _invoice = new Invoice();
+        OnInitialize();
+    }
+
+
+    private void OnInitialize()
+    {
+        SerializerHelper.ConfigureSettingsForInvoice();
+        _invoice.SchemaLocation = SerializerHelper.SchemaLocation;
     }
 
 
@@ -117,8 +128,6 @@ public class InvoiceService : IComputable
     /// <returns>xml invoice as string</returns>
     public string SerializeToString()
     {
-        SerializerHelper.ConfigureSettingsForInvoice();
-
         var settings = new XmlWriterSettings
         {
             CloseOutput = true,
@@ -268,6 +277,35 @@ public class InvoiceService : IComputable
         _invoice.RelatedInvoiceWrapper.RelatedInvoices.Add(invoiceRelated);
     }
 
+
+    /// <summary>
+    /// 1-Serialize the invoice to xml in memory.
+    /// 2-Calculates the original xml string.
+    /// 3-Sign the OriginalString and fill the SignatureValue property.
+    /// </summary>
+    /// <param name="compute">True to call the Compute() method automatically, otherwise false.</param>
+    /// <returns>OriginalString</returns>
+    /// <exception cref="CredentialNotFoundException">When the credential property is not established</exception>
+    /// <exception cref="CredentialConfigurationException">When the path to the XSLT schemas is not established in CredentialSettings.</exception>
+    public string SignInvoice(bool compute = true)
+    {
+        if (Credential is null)
+            throw new CredentialNotFoundException("The credential object has not been set in invoice service.");
+
+
+        if (string.IsNullOrEmpty(CredentialSettings.OriginalStringPath))
+            throw new CredentialConfigurationException(
+                "The path to the xslt schemas was not set in CredentialSettings.");
+
+        Compute();
+
+        var xml = SerializeToString();
+        var originalStr = Credential.GetOriginalStringByXmlString(xml);
+        var signature = Credential.SignData(originalStr);
+        _invoice.SignatureValue = signature.ToBase64String();
+
+        return originalStr;
+    }
 
     #region Properties
 
@@ -486,6 +524,15 @@ public class InvoiceService : IComputable
         get => _pacConfirmation;
         set => _pacConfirmation = _invoice.PacConfirmation = value;
     }
+
+
+    /// <summary>
+    /// Object to sign invoices and manage CSD (cer, key and pass)
+    /// <see>
+    ///     <cref>https://github.com/dotnetcfdi/credentials</cref>
+    /// </see>
+    /// </summary>
+    public ICredential? Credential { get; set; }
 
     #endregion
 }
