@@ -236,6 +236,38 @@ public class InvoiceService : IComputable
         _invoice.GlobalInformation = globalInformation;
     }
 
+    /// <summary>
+    /// Nodo opcional para precisar la información de los comprobantes relacionados.
+    /// </summary>
+    /// <param name="invoiceRelated">invoice related to be added to invoice</param>
+    public void AddRelatedCfdi(InvoiceRelated invoiceRelated)
+    {
+        _invoice.RelatedInvoiceWrapper ??= new InvoiceRelatedWrapper();
+        _invoice.RelatedInvoiceWrapper.RelatedInvoices ??= new List<InvoiceRelated>();
+        _invoice.RelatedInvoiceWrapper.RelatedInvoices.Add(invoiceRelated);
+    }
+
+    /// <summary>
+    /// Nodo opcional para precisar la información de los comprobantes relacionados.
+    /// <param name="invoiceUuid">Atributo requerido para registrar el folio fiscal (UUID) de un CFDI relacionado con el presente comprobante,
+    /// por ejemplo:
+    /// Si el CFDI relacionado es un comprobante de traslado que sirve para registrar el movimiento de la mercancía.
+    /// Si este comprobante se usa como nota de crédito o nota de débito del comprobante relacionado.
+    /// Si este comprobante es una devolución sobre el comprobante relacionado.
+    /// Si éste sustituye a una factura cancelada.</param>
+    /// </summary>
+    public void AddRelatedCfdi(string invoiceUuid)
+    {
+        var invoiceRelated = new InvoiceRelated
+        {
+            InvoiceUuid = invoiceUuid
+        };
+
+        _invoice.RelatedInvoiceWrapper ??= new InvoiceRelatedWrapper();
+        _invoice.RelatedInvoiceWrapper.RelatedInvoices ??= new List<InvoiceRelated>();
+        _invoice.RelatedInvoiceWrapper.RelatedInvoices.Add(invoiceRelated);
+    }
+
 
     #region Properties
 
