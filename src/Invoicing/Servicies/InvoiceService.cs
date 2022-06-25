@@ -219,6 +219,12 @@ public class InvoiceService : IComputable
         _invoice.GlobalInformation = globalInformation;
     }
 
+    /// <summary>
+    /// Nodo condicional para precisar la información relacionada con el comprobante global.
+    /// </summary>
+    /// <param name="periodicity">Atributo requerido para expresar el período al que corresponde la información del comprobante global.</param>
+    /// <param name="month">Atributo requerido para expresar el mes o los meses al que corresponde la información del comprobante global.</param>
+    /// <param name="year">Atributo requerido para expresar el año al que corresponde la información del comprobante global.</param>
     public void AddGlobalInformation(string periodicity, string month, int year)
     {
         var globalInformation = new InvoiceGlobalInformation
