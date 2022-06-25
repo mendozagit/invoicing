@@ -279,9 +279,7 @@ public class InvoiceService : IComputable
 
 
     /// <summary>
-    /// 1-Serialize the invoice to xml in memory.
-    /// 2-Calculates the original xml string.
-    /// 3-Sign the OriginalString and fill the SignatureValue property.
+    /// Sign the OriginalString and fill the Invoice.SignatureValue property with it..
     /// </summary>
     /// <param name="compute">True to call the Compute() method automatically, otherwise false.</param>
     /// <returns>OriginalString</returns>
@@ -297,15 +295,40 @@ public class InvoiceService : IComputable
             throw new CredentialConfigurationException(
                 "The path to the xslt schemas was not set in CredentialSettings.");
 
-        Compute();
 
-        var xml = SerializeToString();
-        var originalStr = Credential.GetOriginalStringByXmlString(xml);
+        var originalStr = ComputeOriginalString(compute);
         var signature = Credential.SignData(originalStr);
         _invoice.SignatureValue = signature.ToBase64String();
 
         return originalStr;
     }
+
+    /// <summary>
+    /// 1-Serialize the invoice to xml in memory.
+    /// 2-Calculates the original xml string.
+    /// </summary>
+    /// <param name="compute">True to call the Compute() method automatically, otherwise false.</param>
+    /// <returns>OriginalString</returns>
+    /// <exception cref="CredentialNotFoundException">When the credential property is not established</exception>
+    /// <exception cref="CredentialConfigurationException">When the path to the XSLT schemas is not established in CredentialSettings.</exception>
+    public string ComputeOriginalString(bool compute = true)
+    {
+        if (Credential is null)
+            throw new CredentialNotFoundException("The credential object has not been set in invoice service.");
+
+
+        if (string.IsNullOrEmpty(CredentialSettings.OriginalStringPath))
+            throw new CredentialConfigurationException(
+                "The path to the xslt schemas was not set in CredentialSettings.");
+        if (compute)
+            Compute();
+
+        var xml = SerializeToString();
+        var originalStr = Credential.GetOriginalStringByXmlString(xml);
+
+        return originalStr;
+    }
+
 
     #region Properties
 
