@@ -141,8 +141,6 @@ public class InvoiceService : IComputable
                 throw new NotSupportedException("Invoice type is not supported");
         }
 
-        SerializerHelper.ConfigureSettingsForInvoice();
-
 
         _invoice.SchemaLocation = SerializerHelper.SchemaLocation;
         var settings = new XmlWriterSettings
@@ -341,6 +339,8 @@ public class InvoiceService : IComputable
         if (string.IsNullOrEmpty(CredentialSettings.OriginalStringPath))
             throw new CredentialConfigurationException(
                 "The path to the xslt schemas was not set in CredentialSettings.");
+
+
         if (compute)
             Compute();
 

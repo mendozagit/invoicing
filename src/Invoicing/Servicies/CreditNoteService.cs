@@ -27,21 +27,6 @@ public class CreditNoteService : InvoiceService, IHasStandardFields
 
 
         // Invoice item
-        var standardInvoiceItem = new InvoiceItem
-        {
-            SatItemId = InvoiceConstants.SatPaymentItemId,
-            //ItemId = "1801", Este campo no debe existir.
-            Quantity = 1,
-            UnitOfMeasureId = InvoiceConstants.SatPaymentUnitOfMeasureId,
-            //UnitOfMeasure = "PZA", Este campo no debe existir.
-            Description = InvoiceConstants.SatPaymentItemDescriptionId,
-            UnitCost = 0,
-            Amount = 0,
-            Discount = 0,
-            TaxObjectId = InvoiceConstants.SatPaymentObjectId,
-        };
-
-        _invoice.InvoiceItems.Add(standardInvoiceItem);
 
 
         // Invoice header
@@ -49,6 +34,5 @@ public class CreditNoteService : InvoiceService, IHasStandardFields
         _invoice.InvoiceDate = DateTime.Now.ToSatFormat();
         _invoice.InvoiceTypeId = InvoiceType.Egreso;
         _invoice.ExportId = "01"; //No aplica
-        _invoice.SchemaLocation = SerializerHelper.SchemaLocation;
     }
 }
