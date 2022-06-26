@@ -1,18 +1,17 @@
 ﻿using System.Xml.Serialization;
 using Invoicing.Common.Attributes;
 
-namespace Invoicing.Common.Enums
+namespace Invoicing.Common.Enums;
+
+public enum InvoiceSerie
 {
-    public enum InvoiceSerie
-    {
-        [EnumValue("F")] [XmlEnum("F")] Ingreso,
+    [EnumValue("F")] [XmlEnum("F")] Ingreso,
 
-        [EnumValue("NC")] [XmlEnum("NC")] Egreso,
+    [EnumValue("NC")] [XmlEnum("NC")] Egreso,
 
-        [EnumValue("T")] [XmlEnum("T")] Traslado,
+    [EnumValue("T")] [XmlEnum("T")] Traslado,
 
-        [EnumValue("N")] [XmlEnum("N")] Nomina,
+    [EnumValue("N")] [XmlEnum("N")] Nomina,
 
-        [EnumValue("P")] [XmlEnum("P")] Pago
-    }
+    [EnumValue("P")] [XmlEnum("P")] Pago
 }

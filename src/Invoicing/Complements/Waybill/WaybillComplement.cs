@@ -1,6 +1,5 @@
-﻿namespace Invoicing.Complements.Waybill
+﻿namespace Invoicing.Complements.Waybill;
+
+internal class WaybillComplement
 {
-    internal class WaybillComplement
-    {
-    }
 }

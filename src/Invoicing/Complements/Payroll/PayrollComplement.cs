@@ -1,6 +1,5 @@
-﻿namespace Invoicing.Complements.Payroll
+﻿namespace Invoicing.Complements.Payroll;
+
+internal class PayrollComplement
 {
-    internal class PayrollComplement
-    {
-    }
 }

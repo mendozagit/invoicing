@@ -1,7 +1,6 @@
-﻿namespace Invoicing.Base
+﻿namespace Invoicing.Base;
+
+public class InvoiceDeserializedComplement
 {
-    public class InvoiceDeserializedComplement
-    {
         
-    }
 }

@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Invoicing.Common.Exceptions;
 
-namespace Invoicing.Common.Exceptions
+internal class CredentialNotFoundException : Exception
 {
-    internal class CredentialNotFoundException : Exception
+    public CredentialNotFoundException()
     {
-        public CredentialNotFoundException()
-        {
-        }
+    }
 
-        public CredentialNotFoundException(string message) : base(message)
-        {
-        }
+    public CredentialNotFoundException(string message) : base(message)
+    {
+    }
 
-        public CredentialNotFoundException(string message, Exception inner) : base(message, inner)
-        {
-        }
+    public CredentialNotFoundException(string message, Exception inner) : base(message, inner)
+    {
     }
 }

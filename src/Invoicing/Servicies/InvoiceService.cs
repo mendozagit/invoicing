@@ -13,20 +13,12 @@ namespace Invoicing.Servicies;
 
 public class InvoiceService : IComputable
 {
-    private readonly Invoice _invoice;
+    internal readonly Invoice _invoice;
 
 
     public InvoiceService()
     {
         _invoice = new Invoice();
-        OnInitialize();
-    }
-
-
-    private void OnInitialize()
-    {
-        SerializerHelper.ConfigureSettingsForInvoice();
-        _invoice.SchemaLocation = SerializerHelper.SchemaLocation;
     }
 
 
@@ -128,6 +120,31 @@ public class InvoiceService : IComputable
     /// <returns>xml invoice as string</returns>
     public string SerializeToString()
     {
+        switch (InvoiceTypeId)
+        {
+            case InvoiceType.Ingreso:
+                SerializerHelper.ConfigureSettingsForInvoice();
+                break;
+            case InvoiceType.Egreso:
+                SerializerHelper.ConfigureSettingsForInvoice();
+                break;
+            case InvoiceType.Traslado:
+                SerializerHelper.ConfigureSettingsForWaybill();
+                break;
+            case InvoiceType.Nomina:
+                SerializerHelper.ConfigureSettingsForPayroll();
+                break;
+            case InvoiceType.Pago:
+                SerializerHelper.ConfigureSettingsForPayment();
+                break;
+            default:
+                throw new NotSupportedException("Invoice type is not supported");
+        }
+
+        SerializerHelper.ConfigureSettingsForInvoice();
+
+
+        _invoice.SchemaLocation = SerializerHelper.SchemaLocation;
         var settings = new XmlWriterSettings
         {
             CloseOutput = true,
@@ -170,7 +187,7 @@ public class InvoiceService : IComputable
     /// <param name="legalName">RazonSocial:Atributo requerido para registrar el nombre, denominación o razón social del contribuyente inscrito en el RFC, del emisor del comprobante.</param>
     /// <param name="taxRegimeId">RegimenFiscalId:Atributo requerido para incorporar la clave del régimen del contribuyente emisor al que aplicará el efecto fiscal de este comprobante.</param>
     /// <param name="operationNumber">FacAtrAdquirente:Atributo condicional para expresar el número de operación proporcionado por el SAT cuando se trate de un comprobante a través de un PCECFDI o un PCGCFDISP.</param>
-    public void AddIssuer(string tin, string legalName, string taxRegimeId, string operationNumber)
+    public void AddIssuer(string tin, string legalName, string taxRegimeId, string? operationNumber = null)
     {
         var invoiceIssuer = new InvoiceIssuer
         {
@@ -258,14 +275,17 @@ public class InvoiceService : IComputable
 
     /// <summary>
     /// Nodo opcional para precisar la información de los comprobantes relacionados.
-    /// <param name="invoiceUuid">Atributo requerido para registrar el folio fiscal (UUID) de un CFDI relacionado con el presente comprobante,
-    /// por ejemplo:
+    /// Por ejemplo:
     /// Si el CFDI relacionado es un comprobante de traslado que sirve para registrar el movimiento de la mercancía.
     /// Si este comprobante se usa como nota de crédito o nota de débito del comprobante relacionado.
     /// Si este comprobante es una devolución sobre el comprobante relacionado.
-    /// Si éste sustituye a una factura cancelada.</param>
+    /// Si éste sustituye a una factura cancelada
     /// </summary>
-    public void AddRelatedCfdi(string invoiceUuid)
+    /// <param name="invoiceUuid">Atributo requerido para registrar el folio fiscal (UUID) de un CFDI relacionado con el presente comprobante</param>
+    /// <param name="relationshipTypeId">Atributo requerido para indicar la clave de la relación que existe entre éste que se está generando y el o los CFDI previo.
+    /// El ultimo tipo relacion agregado afecta todos los UUID. 
+    /// </param>
+    public void AddRelatedCfdi(string invoiceUuid, string relationshipTypeId = "01")
     {
         var invoiceRelated = new InvoiceRelated
         {
@@ -273,6 +293,7 @@ public class InvoiceService : IComputable
         };
 
         _invoice.RelatedInvoiceWrapper ??= new InvoiceRelatedWrapper();
+        _invoice.RelatedInvoiceWrapper.RelationshipTypeId = relationshipTypeId;
         _invoice.RelatedInvoiceWrapper.RelatedInvoices ??= new List<InvoiceRelated>();
         _invoice.RelatedInvoiceWrapper.RelatedInvoices.Add(invoiceRelated);
     }
