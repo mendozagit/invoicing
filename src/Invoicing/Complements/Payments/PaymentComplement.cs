@@ -199,7 +199,7 @@ public class PaymentComplement : ComputeSettings, IComputable
             foreach (var paymentInvoiceTransferredTax in paymentInvoice?.InvoiceTaxesWrapper
                          ?.InvoiceTransferredTaxes!)
             {
-                paymentInvoiceTransferredTax.Base = payment.Ammount.ToSatRounding(ItemsDecimals, RoundingStrategy);
+                paymentInvoiceTransferredTax.Base = payment.Amount.ToSatRounding(ItemsDecimals, RoundingStrategy);
 
                 paymentInvoiceTransferredTax.TaxRate =
                     paymentInvoiceTransferredTax.TaxRate.ToSatRounding(ItemsDecimals, RoundingStrategy);
@@ -246,7 +246,7 @@ public class PaymentComplement : ComputeSettings, IComputable
 
             foreach (var paymentInvoiceWithholdingTax in paymentInvoice?.InvoiceTaxesWrapper?.WithholdingTaxes!)
             {
-                paymentInvoiceWithholdingTax.Base = payment.Ammount.ToSatRounding(ItemsDecimals, RoundingStrategy);
+                paymentInvoiceWithholdingTax.Base = payment.Amount.ToSatRounding(ItemsDecimals, RoundingStrategy);
 
                 paymentInvoiceWithholdingTax.TaxRate =
                     paymentInvoiceWithholdingTax.TaxRate.ToSatRounding(ItemsDecimals, RoundingStrategy);

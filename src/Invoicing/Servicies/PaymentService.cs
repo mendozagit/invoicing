@@ -144,7 +144,7 @@ namespace Invoicing.Servicies
                 PaymentFormId = paymentFormId,
                 CurrencyId = currencyId,
                 ExchangeRate = exchangeRate,
-                Ammount = ammount,
+                Amount = ammount,
                 OperationNumber = operationNumber,
                 OriginBankTin = originBankTin,
                 OriginBankAccountNumber = originBankAccountNumber,
