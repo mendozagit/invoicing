@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using Credencials.Common;
 using Invoicing.Base;
 using Invoicing.Common.Constants;
 using Invoicing.Common.Contracts;
 using Invoicing.Common.Enums;
+using Invoicing.Common.Exceptions;
 using Invoicing.Common.Extensions;
 using Invoicing.Common.Serializing;
 using Invoicing.Complements.Payments;
 
 namespace Invoicing.Servicies
 {
-    public class PaymentService : InvoiceService, IHasStandardFields
+    public class PaymentService : InvoiceService, IHasComplement
     {
         private PaymentComplement? _paymentComplement;
 
@@ -31,9 +34,6 @@ namespace Invoicing.Servicies
         /// </summary>
         public void ConfigureStandardFields()
         {
-            SerializerHelper.ConfigureSettingsForPayment();
-
-
             // payment invoice item
             var standardInvoiceItem = new InvoiceItem
             {
@@ -50,7 +50,6 @@ namespace Invoicing.Servicies
             };
 
             _invoice.InvoiceItems.Add(standardInvoiceItem);
-
 
             // Invoice header
             _invoice.InvoiceVersion = InvoiceVersion.V40;
@@ -118,9 +117,10 @@ namespace Invoicing.Servicies
         /// <param name="base64PaymetCertificate">CertPago:Atributo condicional que sirve para incorporar el certificado que ampara al pago, como una cadena de texto en formato base 64. Es requerido en caso de que el atributo TipoCadPago contenga información.</param>
         /// <param name="paymentOriginalString">CadPago:Atributo condicional para expresar la cadena original del comprobante de pago generado por la entidad emisora de la cuenta beneficiaria. Es requerido en caso de que el atributo TipoCadPago contenga información.</param>
         /// <param name="signatureValue">SelloPago:Atributo condicional para integrar el sello digital que se asocie al pago. La entidad que emite el comprobante de pago, ingresa una cadena original y el sello digital en una sección de dicho comprobante, este sello digital es el que se debe registrar en este atributo. Debe ser expresado como una cadena de texto en formato base 64. Es requerido en caso de que</param>
-        public void AddPayment(string? paymentDate, string? paymentFormId, string? currencyId, decimal exchangeRate,
-            decimal ammount, string? operationNumber, string? originBankTin, string? originBankAccountNumber,
-            string? destinationBankTin, string? destinationAccountNumber, string? foreignBankName = null,
+        public void AddPayment(DateTime paymentDate, string? paymentFormId, decimal ammount, string? currencyId = "MXN",
+            decimal exchangeRate = 1,
+            string? operationNumber = null, string? originBankTin = null, string? originBankAccountNumber = null,
+            string? destinationBankTin = null, string? destinationAccountNumber = null, string? foreignBankName = null,
             string? electronicPaymentSystemId = null, string? base64PaymetCertificate = null,
             string? paymentOriginalString = null,
             string? signatureValue = null)
@@ -140,7 +140,7 @@ namespace Invoicing.Servicies
 
             var payment = new Payment
             {
-                PaymentDate = paymentDate,
+                PaymentDate = paymentDate.ToSatFormat(),
                 PaymentFormId = paymentFormId,
                 CurrencyId = currencyId,
                 ExchangeRate = exchangeRate,
@@ -160,5 +160,91 @@ namespace Invoicing.Servicies
 
             _paymentComplement.Payments.Add(payment);
         }
+
+
+        /// <inheritdoc />
+        public override string SerializeToString()
+        {
+            SerializerHelper.ConfigureSettingsForPayment();
+
+            _invoice.SchemaLocation = SerializerHelper.SchemaLocation;
+            var settings = new XmlWriterSettings
+            {
+                CloseOutput = true,
+                Encoding = Encoding.UTF8,
+                Indent = false
+            };
+            var xml = Serializer<Invoice>.Serialize(_invoice, SerializerHelper.Namespaces, settings);
+            return xml.Clean();
+        }
+
+        /// <inheritdoc />
+        public override void SerializeToFile(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+                throw new ArgumentNullException(nameof(filePath),
+                    "The path to write the payment-invoice.xml must not be null");
+
+
+            SerializerHelper.ConfigureSettingsForInvoice();
+
+            var settings = new XmlWriterSettings
+            {
+                CloseOutput = true,
+                Encoding = Encoding.UTF8,
+                Indent = true
+            };
+            Serializer<Invoice>.SerializeToFile(_invoice, filePath, SerializerHelper.Namespaces, settings);
+        }
+
+        /// <inheritdoc />
+        public void AddInvoiceComplement(bool compute = true)
+        {
+            if (_paymentComplement is null)
+                throw new InvoiceComplementNotFoundException("_paymentComplement is null");
+
+
+            if (compute)
+                _paymentComplement.Compute();
+
+            //insert complement into invoice
+            var paymentComplementXml =
+                Serializer<Invoice>.SerializeElement(_paymentComplement,
+                    InvoiceConstants.SatPayment20Namespace.GetSerializerNamespace("pago20"));
+            _invoice.AddComplement(paymentComplementXml);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sign the OriginalString and fill the Invoice.SignatureValue property with signature of that.
+        /// </summary>
+        /// <param name="compute">True to call the Compute() method automatically, otherwise false.</param>
+        /// <returns>OriginalString</returns>
+        /// <exception cref="CredentialNotFoundException">When the credential property is not established</exception>
+        /// <exception cref="CredentialConfigurationException">When the path to the XSLT schemas is not established in CredentialSettings.</exception>
+        public override string SignInvoice(bool compute = true)
+        {
+            if (Credential is null)
+                throw new CredentialNotFoundException(
+                    "The credential object has not been set in payment invoice service.");
+
+
+            if (string.IsNullOrEmpty(CredentialSettings.OriginalStringPath))
+                throw new CredentialConfigurationException(
+                    "The path to the xslt schemas was not set in CredentialSettings.");
+
+            //Compute and insert complement into invoice
+            AddInvoiceComplement();
+
+            //Compute invoice and calculate OriginalString
+            var originalStr = ComputeOriginalString(compute);
+            var signature = Credential.SignData(originalStr);
+            _invoice.SignatureValue = signature.ToBase64String();
+
+            return originalStr;
+        }
+
+
+        
     }
 }

@@ -367,7 +367,7 @@ public sealed class Invoice : ComputeSettings, IComputable, IInvoice
                 RemoveUnnecessaryElementsWhenCreditNote();
                 break;
             case InvoiceType.Traslado:
-                RemoveUnnecessaryElementsWhenTransportation();
+                RemoveUnnecessaryElementsWhenWaybill();
                 break;
             case InvoiceType.Nomina:
                 RemoveUnnecessaryElementsWhenPayroll();
@@ -376,7 +376,7 @@ public sealed class Invoice : ComputeSettings, IComputable, IInvoice
                 RemoveUnnecessaryElementsWhenPayment();
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new NotSupportedException("Invoice type not yet implemented.");
         }
     }
 
@@ -388,7 +388,7 @@ public sealed class Invoice : ComputeSettings, IComputable, IInvoice
     {
     }
 
-    private void RemoveUnnecessaryElementsWhenTransportation()
+    private void RemoveUnnecessaryElementsWhenWaybill()
     {
         throw new NotImplementedException();
     }

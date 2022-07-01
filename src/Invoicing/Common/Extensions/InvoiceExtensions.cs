@@ -95,8 +95,11 @@ public static class InvoiceExtensions
     /// <returns>Element without namespace declaration</returns>
     public static XElement? RemoveNamespaceDeclaration(this XElement element)
     {
-        // element.Attribute(XNamespace.Xmlns + "xsi").Remove();
+        //element.Attribute(XNamespace.Xmlns + "xsi").Remove();
         element?.Attributes()?.Where(a => a.IsNamespaceDeclaration)?.Remove();
+
+        var elements = element?.Attributes()?.ToList();
+
         return element;
     }
 

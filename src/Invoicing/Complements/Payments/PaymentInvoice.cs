@@ -97,6 +97,17 @@ public class PaymentInvoice
     }
 
     /// <summary>
+    /// Add transferred taxes list to current payment invoice.
+    /// </summary>
+    /// <param name="paymentInvoiceTransferredTaxes">transferred tax list object</param>
+    public void AddTransferredTaxes(List<PaymentInvoiceTransferredTax> paymentInvoiceTransferredTaxes)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes.AddRange(paymentInvoiceTransferredTaxes);
+    }
+
+    /// <summary>
     /// Add transferred tax to current payment invoice.
     /// Manually calculated
     /// </summary>
@@ -155,6 +166,17 @@ public class PaymentInvoice
         InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
         InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
         InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
+    }
+
+    /// <summary>
+    /// Add withholding tax list to current payment invoice.
+    /// </summary>
+    /// <param name="paymentInvoiceWithholdingTaxes">withholding tax list object</param>
+    public void AddWithholdingTaxes(List<PaymentInvoiceWithholdingTax> paymentInvoiceWithholdingTaxes)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+        InvoiceTaxesWrapper.WithholdingTaxes.AddRange(paymentInvoiceWithholdingTaxes);
     }
 
     /// <summary>

@@ -7,6 +7,8 @@ using Invoicing.Common.Serializing;
 
 namespace Invoicing.Servicies;
 
+
+
 public class CreditNoteService : InvoiceService, IHasStandardFields
 {
     public CreditNoteService()
