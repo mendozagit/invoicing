@@ -1,4 +1,5 @@
 ﻿using System.Xml.Serialization;
+using Invoicing.Base;
 
 namespace Invoicing.Complements.Payments;
 
@@ -80,4 +81,132 @@ public class PaymentInvoice
     /// </summary>
     [XmlElement("ImpuestosDR")]
     public PaymentInvoiceTaxesWrapper? InvoiceTaxesWrapper { get; set; }
+
+
+    #region DomainServices
+
+    /// <summary>
+    /// Add transferred tax to current payment invoice.
+    /// </summary>
+    /// <param name="paymentInvoiceTransferredTax">transferred tax object</param>
+    public void AddTransferredTax(PaymentInvoiceTransferredTax paymentInvoiceTransferredTax)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes.Add(paymentInvoiceTransferredTax);
+    }
+
+    /// <summary>
+    /// Add transferred tax to current payment invoice.
+    /// Manually calculated
+    /// </summary>
+    /// <param name="pbase">Base:Atributo requerido para señalar la base para el cálculo del impuesto, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.</param>
+    /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
+    /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+    /// <param name="taxRate">TasaOCuota:Atributo condicional para señalar el valor de la tasa o cuota del impuesto que se traslada para el presente concepto. Es requerido cuando el atributo TipoFactor tenga una clave que corresponda a Tasa o Cuota.</param>
+    /// <param name="amount">Importe:Atributo condicional para señalar el importe del impuesto trasladado que aplica al concepto. No se permiten valores negativos. Es requerido cuando TipoFactor sea Tasa o Cuota.</param>
+    public void AddTransferredTax(decimal pbase, string taxId, string taxTypeId, decimal taxRate, decimal amount)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+
+        var paymentInvoiceTransferredTax = new PaymentInvoiceTransferredTax
+        {
+            Base = pbase,
+            TaxId = taxId,
+            TaxTypeId = taxTypeId,
+            TaxRate = taxRate,
+            Amount = amount
+        };
+
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes.Add(paymentInvoiceTransferredTax);
+    }
+
+    /// <summary>
+    /// Add transferred tax to current invoice item.
+    /// Self-calculating
+    /// </summary>
+    /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
+    /// <param name="taxTypeId">TipoFactor:|Tasa|Cuota|Exento|:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+    /// <param name="taxRate">TasaOCuota:Atributo condicional para señalar el valor de la tasa o cuota del impuesto que se traslada para el presente concepto. Es requerido cuando el atributo TipoFactor tenga una clave que corresponda a Tasa o Cuota.</param>
+    public void AddTransferredTax(string taxId, string taxTypeId, decimal taxRate = 0)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+
+        var paymentInvoiceTransferredTax = new PaymentInvoiceTransferredTax()
+        {
+            Base = PaymentAmount,
+            TaxId = taxId,
+            TaxTypeId = taxTypeId,
+            TaxRate = taxRate,
+            Amount = PaymentAmount * taxRate
+        };
+
+        InvoiceTaxesWrapper.InvoiceTransferredTaxes.Add(paymentInvoiceTransferredTax);
+    }
+
+    /// <summary>
+    /// Add withholding tax to current payment invoice.
+    /// </summary>
+    /// <param name="paymentInvoiceWithholdingTax">withholding tax object</param>
+    public void AddWithholdingTax(PaymentInvoiceWithholdingTax paymentInvoiceWithholdingTax)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+        InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
+    }
+
+    /// <summary>
+    /// Add withholding tax to current payment invoice.
+    /// Manually calculated
+    /// </summary>
+    /// <param name="pbase">Base:Atributo requerido para señalar la base para el cálculo de la retención, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.</param>
+    /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
+    /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+    /// <param name="taxRate">TasaOCuota:Atributo requerido para señalar la tasa o cuota del impuesto que se retiene para el presente concepto.</param>
+    /// <param name="amount">Importe:Atributo requerido para señalar el importe del impuesto retenido que aplica al concepto. No se permiten valores negativos.</param>
+    public void AddWithholdingTax(decimal pbase, string taxId, string taxTypeId, decimal taxRate, decimal amount)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+
+
+        var paymentInvoiceWithholdingTax = new PaymentInvoiceWithholdingTax
+        {
+            Base = pbase,
+            TaxId = taxId,
+            TaxTypeId = taxTypeId,
+            TaxRate = taxRate,
+            Amount = amount
+        };
+
+        InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
+    }
+
+    /// <summary>
+    /// Add withholding tax to current payment invoice.
+    /// Self-calculating
+    /// </summary>
+    /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
+    /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+    /// <param name="taxRate">TasaOCuota:Atributo requerido para señalar la tasa o cuota del impuesto que se retiene para el presente concepto.</param>
+    public void AddWithholdingTax(string taxId, string taxTypeId, decimal taxRate)
+    {
+        InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+        InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+
+        var paymentInvoiceWithholdingTax = new PaymentInvoiceWithholdingTax()
+        {
+            Base = PaymentAmount,
+            TaxId = taxId,
+            TaxTypeId = taxTypeId,
+            TaxRate = taxRate,
+            Amount = PaymentAmount * taxRate
+        };
+
+        InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
+    }
+
+    #endregion
 }
