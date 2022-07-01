@@ -10,8 +10,4 @@
     <ProjectReference Include="..\..\..\credentials\src\Credencials\Credencials.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Common\Enums\WaybillVersion\" />
-  </ItemGroup>
-
 </Project>

@@ -118,8 +118,8 @@ namespace Invoicing.Servicies
         /// <param name="paymentOriginalString">CadPago:Atributo condicional para expresar la cadena original del comprobante de pago generado por la entidad emisora de la cuenta beneficiaria. Es requerido en caso de que el atributo TipoCadPago contenga información.</param>
         /// <param name="signatureValue">SelloPago:Atributo condicional para integrar el sello digital que se asocie al pago. La entidad que emite el comprobante de pago, ingresa una cadena original y el sello digital en una sección de dicho comprobante, este sello digital es el que se debe registrar en este atributo. Debe ser expresado como una cadena de texto en formato base 64. Es requerido en caso de que</param>
         public void AddPayment(DateTime paymentDate, string? paymentFormId, decimal ammount, string? currencyId = "MXN",
-            decimal exchangeRate = 1,
-            string? operationNumber = null, string? originBankTin = null, string? originBankAccountNumber = null,
+            decimal exchangeRate = 1, string? operationNumber = null, string? originBankTin = null,
+            string? originBankAccountNumber = null,
             string? destinationBankTin = null, string? destinationAccountNumber = null, string? foreignBankName = null,
             string? electronicPaymentSystemId = null, string? base64PaymetCertificate = null,
             string? paymentOriginalString = null,
@@ -215,13 +215,6 @@ namespace Invoicing.Servicies
         }
 
         /// <inheritdoc />
-        /// <summary>
-        /// Sign the OriginalString and fill the Invoice.SignatureValue property with signature of that.
-        /// </summary>
-        /// <param name="compute">True to call the Compute() method automatically, otherwise false.</param>
-        /// <returns>OriginalString</returns>
-        /// <exception cref="CredentialNotFoundException">When the credential property is not established</exception>
-        /// <exception cref="CredentialConfigurationException">When the path to the XSLT schemas is not established in CredentialSettings.</exception>
         public override string SignInvoice(bool compute = true)
         {
             if (Credential is null)
@@ -245,6 +238,202 @@ namespace Invoicing.Servicies
         }
 
 
-        
+        #region DomainServices
+
+        /// <summary>
+        /// Add an invoice (related document) to last payment added.
+        /// Nodo requerido para expresar la lista de documentos relacionados con los pagos. Por cada documento que se relacione se debe generar un nodo DoctoRelacionado.
+        /// </summary>
+        /// <param name="invoice"></param>
+        public void AddInvoice(PaymentInvoice invoice)
+        {
+            _paymentComplement ??= new PaymentComplement();
+            _paymentComplement.Payments ??= new List<Payment>();
+            var payment = _paymentComplement.Payments.LastOrDefault();
+
+            if (payment is null)
+                throw new LastPaymentNotFoundException("No has payments to add paymentinvoice object.");
+
+            payment.Invoices ??= new List<PaymentInvoice>();
+            payment.Invoices.Add(invoice);
+        }
+
+        /// <summary>
+        /// Add an invoice (related document) to current payment.
+        /// Nodo requerido para expresar la lista de documentos relacionados con los pagos. Por cada documento que se relacione se debe generar un nodo DoctoRelacionado.
+        /// </summary>
+        /// <param name="invoiceUuid">IdDocumento:Atributo requerido para expresar el identificador del documento relacionado con el pago. Este dato puede ser un Folio Fiscal de la Factura Electrónica o bien el número de operación de un documento digital.</param>
+        /// <param name="invoiceSeries">Serie:Atributo opcional para precisar la serie del comprobante para control interno del contribuyente, acepta una cadena de caracteres.</param>
+        /// <param name="invoiceNumber">Folio:Atributo opcional para precisar el folio del comprobante para control interno del contribuyente, acepta una cadena de caracteres.</param>
+        /// <param name="invoiceCurrencyId">MonedaDR:Atributo requerido para identificar la clave de la moneda utilizada en los importes del documento relacionado, cuando se usa moneda nacional o el documento relacionado no especifica la moneda se registra MXN. Los importes registrados en los atributos “ImpSaldoAnt”, “ImpPagado” e “ImpSaldoInsoluto” de éste nodo, deben corresponder a esta moneda. Conforme con la especificación ISO 4217.</param>
+        /// <param name="invoiceExchangeRate">EquivalenciaDR:Atributo condicional para expresar el tipo de cambio conforme con la moneda registrada en el documento relacionado. Es requerido cuando la moneda del documento relacionado es distinta de la moneda de pago. Se debe registrar el número de unidades de la moneda señalada en el documento relacionado que equivalen a una unidad de la moneda del pago. Por ejemplo: El documento relacionado se registra en USD. El pago se realiza por 100 EUR. Este atributo se registra como 1.114700 USD/EUR. El importe pagado equivale a 100 EUR * 1.114700 USD/EUR = 111.47 USD.</param>
+        /// <param name="partialityNumber">NumParcialidad:Atributo requerido para expresar el número de parcialidad que corresponde al pago.</param>
+        /// <param name="previousBalanceAmount">ImpSaldoAnt:Atributo requerido para expresar el monto del saldo insoluto de la parcialidad anterior. En el caso de que sea la primer parcialidad este atributo debe contener el importe total del documento relacionado.</param>
+        /// <param name="paymentAmount">ImpPagado:Atributo requerido para expresar el importe pagado para el documento relacionado.</param>
+        /// <param name="remainingBalance">ImpSaldoInsoluto:Atributo requerido para expresar la diferencia entre el importe del saldo anterior y el monto del pago.</param>
+        /// <param name="taxObjectId">ObjetoImpDR:Atributo requerido para expresar si el pago del documento relacionado es objeto o no de impuesto.</param>
+        public void AddInvoice(
+            string? invoiceUuid,
+            string? invoiceSeries,
+            string? invoiceNumber,
+            string? invoiceCurrencyId,
+            decimal invoiceExchangeRate,
+            int partialityNumber,
+            decimal previousBalanceAmount,
+            decimal paymentAmount,
+            decimal remainingBalance,
+            string? taxObjectId)
+        {
+            _paymentComplement ??= new PaymentComplement();
+            _paymentComplement.Payments ??= new List<Payment>();
+            var payment = _paymentComplement.Payments.LastOrDefault();
+
+            if (payment is null)
+                throw new LastPaymentNotFoundException("No has payments to add paymentinvoice object.");
+
+            payment.Invoices ??= new List<PaymentInvoice>();
+
+
+            var invoice = new PaymentInvoice
+            {
+                InvoiceUuid = invoiceUuid,
+                InvoiceSeries = invoiceSeries,
+                InvoiceNumber = invoiceNumber,
+                InvoiceCurrencyId = invoiceCurrencyId,
+                InvoiceExchangeRate = invoiceExchangeRate,
+                PartialityNumber = partialityNumber,
+                PreviousBalanceAmount = previousBalanceAmount,
+                PaymentAmount = paymentAmount,
+                RemainingBalance = remainingBalance,
+                TaxObjectId = taxObjectId,
+            };
+            payment.Invoices.Add(invoice);
+        }
+
+
+        /// <summary>
+        /// Add transferred tax to current payment.
+        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// </summary>
+        /// <param name="paymentTransferredTax">transferred tax object</param>
+        public void AddTransferredTax(PaymentTransferredTax paymentTransferredTax)
+        {
+            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
+            PaymentTaxexWrapper.PaymentTransferredTaxes ??= new List<PaymentTransferredTax>();
+            PaymentTaxexWrapper.PaymentTransferredTaxes.Add(paymentTransferredTax);
+        }
+
+        /// <summary>
+        /// Add transferred tax to current payment.
+        /// Manually calculated
+        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// </summary>
+        /// <param name="pbase">Base:Atributo requerido para señalar la base para el cálculo del impuesto, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.</param>
+        /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
+        /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+        /// <param name="taxRate">TasaOCuota:Atributo condicional para señalar el valor de la tasa o cuota del impuesto que se traslada para el presente concepto. Es requerido cuando el atributo TipoFactor tenga una clave que corresponda a Tasa o Cuota.</param>
+        /// <param name="amount">Importe:Atributo condicional para señalar el importe del impuesto trasladado que aplica al concepto. No se permiten valores negativos. Es requerido cuando TipoFactor sea Tasa o Cuota.</param>
+        public void AddTransferredTax(decimal pbase, string taxId, string taxTypeId, decimal taxRate, decimal amount)
+        {
+            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
+            PaymentTaxexWrapper.PaymentTransferredTaxes ??= new List<PaymentTransferredTax>();
+
+
+            var paymentTransferredTax = new PaymentTransferredTax
+            {
+                Base = pbase,
+                TaxId = taxId,
+                TaxTypeId = taxTypeId,
+                TaxRate = taxRate,
+                Amount = amount
+            };
+
+            PaymentTaxexWrapper.PaymentTransferredTaxes.Add(paymentTransferredTax);
+        }
+
+        /// <summary>
+        /// Add transferred tax to current invoice item.
+        /// Self-calculating
+        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// </summary>
+        /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
+        /// <param name="taxTypeId">TipoFactor:|Tasa|Cuota|Exento|:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+        /// <param name="taxRate">TasaOCuota:Atributo condicional para señalar el valor de la tasa o cuota del impuesto que se traslada para el presente concepto. Es requerido cuando el atributo TipoFactor tenga una clave que corresponda a Tasa o Cuota.</param>
+        public void AddTransferredTax(string taxId, string taxTypeId, decimal taxRate = 0)
+        {
+            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
+            PaymentTaxexWrapper.PaymentTransferredTaxes ??= new List<PaymentTransferredTax>();
+
+            var paymentTransferredTax = new PaymentTransferredTax()
+            {
+                Base = Amount,
+                TaxId = taxId,
+                TaxTypeId = taxTypeId,
+                TaxRate = taxRate,
+                Amount = Amount * taxRate
+            };
+
+            PaymentTaxexWrapper.PaymentTransferredTaxes.Add(paymentTransferredTax);
+        }
+
+        /// <summary>
+        /// Add withholding tax to current payment.
+        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// </summary>
+        /// <param name="paymentWithholdingTax">withholding tax object</param>
+        public void AddWithholdingTax(PaymentWithholdingTax paymentWithholdingTax)
+        {
+            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
+            PaymentTaxexWrapper.PaymentWithholdingTaxes ??= new List<PaymentWithholdingTax>();
+            PaymentTaxexWrapper.PaymentWithholdingTaxes.Add(paymentWithholdingTax);
+        }
+
+        /// <summary>
+        /// Add withholding tax to current payment invoice.
+        /// Manually calculated
+        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// </summary>
+        /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
+        /// <param name="amount">Importe:Atributo requerido para señalar el importe del impuesto retenido que aplica al concepto. No se permiten valores negativos.</param>
+        public void AddWithholdingTax(string taxId, decimal amount)
+        {
+            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
+            PaymentTaxexWrapper.PaymentWithholdingTaxes ??= new List<PaymentWithholdingTax>();
+
+
+            var paymentWithholdingTax = new PaymentWithholdingTax
+            {
+                // Base = pbase,
+                TaxId = taxId,
+                //TaxTypeId = taxTypeId,
+                //TaxRate = taxRate,
+                Amount = amount
+            };
+
+            PaymentTaxexWrapper.PaymentWithholdingTaxes.Add(paymentWithholdingTax);
+        }
+
+        /// <summary>
+        /// Add withholding tax to current payment.
+        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// Self-calculating
+        /// </summary>
+        /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
+        public void AddWithholdingTax(string taxId)
+        {
+            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
+            PaymentTaxexWrapper.PaymentWithholdingTaxes ??= new List<PaymentWithholdingTax>();
+
+
+            var paymentInvoiceWithholdingTax = new PaymentWithholdingTax()
+            {
+                TaxId = taxId,
+                Amount = Amount
+            };
+
+            PaymentTaxexWrapper.PaymentWithholdingTaxes.Add(paymentInvoiceWithholdingTax);
+        }
+
+        #endregion
     }
 }
