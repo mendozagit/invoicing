@@ -92,8 +92,8 @@ public class PaymentInvoice
     public void AddTransferredTax(PaymentInvoiceTransferredTax paymentInvoiceTransferredTax)
     {
         InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes.Add(paymentInvoiceTransferredTax);
+        InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+        InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
     }
 
     /// <summary>
@@ -103,8 +103,8 @@ public class PaymentInvoice
     public void AddTransferredTaxes(List<PaymentInvoiceTransferredTax> paymentInvoiceTransferredTaxes)
     {
         InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes.AddRange(paymentInvoiceTransferredTaxes);
+        InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+        InvoiceTaxesWrapper.TransferredTaxes.AddRange(paymentInvoiceTransferredTaxes);
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public class PaymentInvoice
     public void AddTransferredTax(decimal pbase, string taxId, string taxTypeId, decimal taxRate, decimal amount)
     {
         InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+        InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
 
         var paymentInvoiceTransferredTax = new PaymentInvoiceTransferredTax
         {
@@ -130,7 +130,7 @@ public class PaymentInvoice
             Amount = amount
         };
 
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes.Add(paymentInvoiceTransferredTax);
+        InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ public class PaymentInvoice
     public void AddTransferredTax(string taxId, string taxTypeId, decimal taxRate = 0)
     {
         InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+        InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
 
         var paymentInvoiceTransferredTax = new PaymentInvoiceTransferredTax()
         {
@@ -154,7 +154,7 @@ public class PaymentInvoice
             Amount = PaymentAmount * taxRate
         };
 
-        InvoiceTaxesWrapper.InvoiceTransferredTaxes.Add(paymentInvoiceTransferredTax);
+        InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
     }
 
     /// <summary>

@@ -238,7 +238,7 @@ namespace Invoicing.Servicies
         }
 
 
-        #region DomainServices
+        #region Domain methods
 
         /// <summary>
         /// Add an invoice (related document) to last payment added.
@@ -312,21 +312,56 @@ namespace Invoicing.Servicies
 
 
         /// <summary>
-        /// Add transferred tax to current payment.
-        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// Add transferred tax to last PaymentInvoice added.
         /// </summary>
-        /// <param name="paymentTransferredTax">transferred tax object</param>
-        public void AddTransferredTax(PaymentTransferredTax paymentTransferredTax)
+        /// <param name="paymentInvoiceTransferredTax">transferred tax object</param>
+        public void AddTransferredTax(PaymentInvoiceTransferredTax paymentInvoiceTransferredTax)
         {
-            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
-            PaymentTaxexWrapper.PaymentTransferredTaxes ??= new List<PaymentTransferredTax>();
-            PaymentTaxexWrapper.PaymentTransferredTaxes.Add(paymentTransferredTax);
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
+
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
+
+
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
         }
 
         /// <summary>
-        /// Add transferred tax to current payment.
+        /// Add transferred taxes list to last PaymentInvoice added.
+        /// </summary>
+        /// <param name="paymentInvoiceTransferredTaxes">transferred tax list object</param>
+        public void AddTransferredTaxes(List<PaymentInvoiceTransferredTax> paymentInvoiceTransferredTaxes)
+        {
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
+
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
+
+
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes.AddRange(paymentInvoiceTransferredTaxes);
+        }
+
+        /// <summary>
+        /// Add transferred tax to last PaymentInvoice added.
         /// Manually calculated
-        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
         /// </summary>
         /// <param name="pbase">Base:Atributo requerido para señalar la base para el cálculo del impuesto, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.</param>
         /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
@@ -335,11 +370,23 @@ namespace Invoicing.Servicies
         /// <param name="amount">Importe:Atributo condicional para señalar el importe del impuesto trasladado que aplica al concepto. No se permiten valores negativos. Es requerido cuando TipoFactor sea Tasa o Cuota.</param>
         public void AddTransferredTax(decimal pbase, string taxId, string taxTypeId, decimal taxRate, decimal amount)
         {
-            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
-            PaymentTaxexWrapper.PaymentTransferredTaxes ??= new List<PaymentTransferredTax>();
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
+
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
 
 
-            var paymentTransferredTax = new PaymentTransferredTax
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+
+            var paymentInvoiceTransferredTax = new PaymentInvoiceTransferredTax
             {
                 Base = pbase,
                 TaxId = taxId,
@@ -348,90 +395,170 @@ namespace Invoicing.Servicies
                 Amount = amount
             };
 
-            PaymentTaxexWrapper.PaymentTransferredTaxes.Add(paymentTransferredTax);
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
         }
 
         /// <summary>
-        /// Add transferred tax to current invoice item.
+        /// Add transferred tax to last PaymentInvoice added.
         /// Self-calculating
-        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
         /// </summary>
         /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto trasladado aplicable al concepto.</param>
         /// <param name="taxTypeId">TipoFactor:|Tasa|Cuota|Exento|:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
         /// <param name="taxRate">TasaOCuota:Atributo condicional para señalar el valor de la tasa o cuota del impuesto que se traslada para el presente concepto. Es requerido cuando el atributo TipoFactor tenga una clave que corresponda a Tasa o Cuota.</param>
         public void AddTransferredTax(string taxId, string taxTypeId, decimal taxRate = 0)
         {
-            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
-            PaymentTaxexWrapper.PaymentTransferredTaxes ??= new List<PaymentTransferredTax>();
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
 
-            var paymentTransferredTax = new PaymentTransferredTax()
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
+
+
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+
+
+            var paymentInvoiceTransferredTax = new PaymentInvoiceTransferredTax()
             {
-                Base = Amount,
+                Base = lastPaymentInvoice.PaymentAmount,
                 TaxId = taxId,
                 TaxTypeId = taxTypeId,
                 TaxRate = taxRate,
-                Amount = Amount * taxRate
+                Amount = lastPaymentInvoice.PaymentAmount * taxRate
             };
 
-            PaymentTaxexWrapper.PaymentTransferredTaxes.Add(paymentTransferredTax);
+            lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
         }
 
         /// <summary>
-        /// Add withholding tax to current payment.
-        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// Add withholding tax to last PaymentInvoice added.
         /// </summary>
-        /// <param name="paymentWithholdingTax">withholding tax object</param>
-        public void AddWithholdingTax(PaymentWithholdingTax paymentWithholdingTax)
+        /// <param name="paymentInvoiceWithholdingTax">withholding tax object</param>
+        public void AddWithholdingTax(PaymentInvoiceWithholdingTax paymentInvoiceWithholdingTax)
         {
-            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
-            PaymentTaxexWrapper.PaymentWithholdingTaxes ??= new List<PaymentWithholdingTax>();
-            PaymentTaxexWrapper.PaymentWithholdingTaxes.Add(paymentWithholdingTax);
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
+
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
+
+
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
         }
 
         /// <summary>
-        /// Add withholding tax to current payment invoice.
+        /// Add withholding tax list to last PaymentInvoice added.
+        /// </summary>
+        /// <param name="paymentInvoiceWithholdingTaxes">withholding tax list object</param>
+        public void AddWithholdingTaxes(List<PaymentInvoiceWithholdingTax> paymentInvoiceWithholdingTaxes)
+        {
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
+
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
+
+
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes.AddRange(paymentInvoiceWithholdingTaxes);
+        }
+
+        /// <summary>
+        /// Add withholding tax to last PaymentInvoice added.
         /// Manually calculated
-        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
         /// </summary>
+        /// <param name="pbase">Base:Atributo requerido para señalar la base para el cálculo de la retención, la determinación de la base se realiza de acuerdo con las disposiciones fiscales vigentes. No se permiten valores negativos.</param>
         /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
+        /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+        /// <param name="taxRate">TasaOCuota:Atributo requerido para señalar la tasa o cuota del impuesto que se retiene para el presente concepto.</param>
         /// <param name="amount">Importe:Atributo requerido para señalar el importe del impuesto retenido que aplica al concepto. No se permiten valores negativos.</param>
-        public void AddWithholdingTax(string taxId, decimal amount)
+        public void AddWithholdingTax(decimal pbase, string taxId, string taxTypeId, decimal taxRate, decimal amount)
         {
-            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
-            PaymentTaxexWrapper.PaymentWithholdingTaxes ??= new List<PaymentWithholdingTax>();
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
+
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
 
 
-            var paymentWithholdingTax = new PaymentWithholdingTax
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+
+
+            var paymentInvoiceWithholdingTax = new PaymentInvoiceWithholdingTax
             {
-                // Base = pbase,
+                Base = pbase,
                 TaxId = taxId,
-                //TaxTypeId = taxTypeId,
-                //TaxRate = taxRate,
+                TaxTypeId = taxTypeId,
+                TaxRate = taxRate,
                 Amount = amount
             };
 
-            PaymentTaxexWrapper.PaymentWithholdingTaxes.Add(paymentWithholdingTax);
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
         }
 
         /// <summary>
-        /// Add withholding tax to current payment.
-        /// You can optionally use this method if you do NOT want to use the Compute method for automatic calculation.
+        /// Add withholding tax to last PaymentInvoice added.
         /// Self-calculating
         /// </summary>
         /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
-        public void AddWithholdingTax(string taxId)
+        /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+        /// <param name="taxRate">TasaOCuota:Atributo requerido para señalar la tasa o cuota del impuesto que se retiene para el presente concepto.</param>
+        public void AddWithholdingTax(string taxId, string taxTypeId, decimal taxRate)
         {
-            PaymentTaxexWrapper ??= new PaymentTaxesWrapper();
-            PaymentTaxexWrapper.PaymentWithholdingTaxes ??= new List<PaymentWithholdingTax>();
+            var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
+
+            if (lastPayment is null)
+                throw new LastPaymentNotFoundException("Not found last Payment object.");
 
 
-            var paymentInvoiceWithholdingTax = new PaymentWithholdingTax()
+            var lastPaymentInvoice = lastPayment?.Invoices?.LastOrDefault();
+
+
+            if (lastPaymentInvoice is null)
+                throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
+
+
+            lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+
+            var paymentInvoiceWithholdingTax = new PaymentInvoiceWithholdingTax()
             {
+                Base = lastPaymentInvoice.PaymentAmount,
                 TaxId = taxId,
-                Amount = Amount
+                TaxTypeId = taxTypeId,
+                TaxRate = taxRate,
+                Amount = lastPaymentInvoice.PaymentAmount * taxRate
             };
 
-            PaymentTaxexWrapper.PaymentWithholdingTaxes.Add(paymentInvoiceWithholdingTax);
+            lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
         }
 
         #endregion

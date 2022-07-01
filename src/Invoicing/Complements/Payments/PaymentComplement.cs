@@ -194,10 +194,10 @@ public class PaymentComplement : ComputeSettings, IComputable
 
         foreach (var paymentInvoice in payment.Invoices)
         {
-            if (paymentInvoice?.InvoiceTaxesWrapper?.InvoiceTransferredTaxes is null) continue;
+            if (paymentInvoice?.InvoiceTaxesWrapper?.TransferredTaxes is null) continue;
 
             foreach (var paymentInvoiceTransferredTax in paymentInvoice?.InvoiceTaxesWrapper
-                         ?.InvoiceTransferredTaxes!)
+                         ?.TransferredTaxes!)
             {
                 paymentInvoiceTransferredTax.Base = payment.Amount.ToSatRounding(ItemsDecimals, RoundingStrategy);
 

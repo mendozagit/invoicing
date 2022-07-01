@@ -21,5 +21,5 @@ public class PaymentInvoiceTaxesWrapper
     /// </summary>
     [XmlArray("TrasladosDR")]
     [XmlArrayItem("TrasladoDR")]
-    public List<PaymentInvoiceTransferredTax>? InvoiceTransferredTaxes { get; set; }
+    public List<PaymentInvoiceTransferredTax>? TransferredTaxes { get; set; }
 }
