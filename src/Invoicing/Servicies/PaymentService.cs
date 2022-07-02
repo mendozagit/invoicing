@@ -245,7 +245,7 @@ namespace Invoicing.Servicies
         /// Nodo requerido para expresar la lista de documentos relacionados con los pagos. Por cada documento que se relacione se debe generar un nodo DoctoRelacionado.
         /// </summary>
         /// <param name="invoice"></param>
-        public void AddInvoice(PaymentInvoice invoice)
+        public void AddPaymentInvoice(PaymentInvoice invoice)
         {
             _paymentComplement ??= new PaymentComplement();
             _paymentComplement.Payments ??= new List<Payment>();
@@ -272,7 +272,7 @@ namespace Invoicing.Servicies
         /// <param name="paymentAmount">ImpPagado:Atributo requerido para expresar el importe pagado para el documento relacionado.</param>
         /// <param name="remainingBalance">ImpSaldoInsoluto:Atributo requerido para expresar la diferencia entre el importe del saldo anterior y el monto del pago.</param>
         /// <param name="taxObjectId">ObjetoImpDR:Atributo requerido para expresar si el pago del documento relacionado es objeto o no de impuesto.</param>
-        public void AddInvoice(
+        public void AddPaymentInvoice(
             string? invoiceUuid,
             string? invoiceSeries,
             string? invoiceNumber,
@@ -332,6 +332,7 @@ namespace Invoicing.Servicies
 
             lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
             lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+            paymentInvoiceTransferredTax.TaxRate = paymentInvoiceTransferredTax.TaxRate.ToSatRounding();
             lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
         }
 
@@ -339,7 +340,7 @@ namespace Invoicing.Servicies
         /// Add transferred taxes list to last PaymentInvoice added.
         /// </summary>
         /// <param name="paymentInvoiceTransferredTaxes">transferred tax list object</param>
-        public void AddTransferredTaxes(List<PaymentInvoiceTransferredTax> paymentInvoiceTransferredTaxes)
+        public void AddTransferredTaxes(List<PaymentInvoiceTransferredTax>? paymentInvoiceTransferredTaxes)
         {
             var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
 
@@ -354,8 +355,17 @@ namespace Invoicing.Servicies
                 throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
 
 
+            if (paymentInvoiceTransferredTaxes is null)
+                throw new ArgumentNullException(nameof(paymentInvoiceTransferredTaxes));
+
+
             lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
             lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes ??= new List<PaymentInvoiceTransferredTax>();
+
+            foreach (var paymentInvoiceTransferredTax in paymentInvoiceTransferredTaxes)
+                paymentInvoiceTransferredTax.TaxRate = paymentInvoiceTransferredTax.TaxRate.ToSatRounding();
+
+
             lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes.AddRange(paymentInvoiceTransferredTaxes);
         }
 
@@ -391,7 +401,7 @@ namespace Invoicing.Servicies
                 Base = pbase,
                 TaxId = taxId,
                 TaxTypeId = taxTypeId,
-                TaxRate = taxRate,
+                TaxRate = taxRate.ToSatRounding(),
                 Amount = amount
             };
 
@@ -429,8 +439,8 @@ namespace Invoicing.Servicies
                 Base = lastPaymentInvoice.PaymentAmount,
                 TaxId = taxId,
                 TaxTypeId = taxTypeId,
-                TaxRate = taxRate,
-                Amount = lastPaymentInvoice.PaymentAmount * taxRate
+                TaxRate = taxRate.ToSatRounding(),
+                Amount = lastPaymentInvoice.PaymentAmount * taxRate.ToSatRounding()
             };
 
             lastPaymentInvoice.InvoiceTaxesWrapper.TransferredTaxes.Add(paymentInvoiceTransferredTax);
@@ -457,6 +467,8 @@ namespace Invoicing.Servicies
 
             lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
             lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+
+            paymentInvoiceWithholdingTax.TaxRate = paymentInvoiceWithholdingTax.TaxRate.ToSatRounding();
             lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);
         }
 
@@ -464,7 +476,7 @@ namespace Invoicing.Servicies
         /// Add withholding tax list to last PaymentInvoice added.
         /// </summary>
         /// <param name="paymentInvoiceWithholdingTaxes">withholding tax list object</param>
-        public void AddWithholdingTaxes(List<PaymentInvoiceWithholdingTax> paymentInvoiceWithholdingTaxes)
+        public void AddWithholdingTaxes(List<PaymentInvoiceWithholdingTax>? paymentInvoiceWithholdingTaxes)
         {
             var lastPayment = _paymentComplement?.Payments?.LastOrDefault();
 
@@ -479,8 +491,17 @@ namespace Invoicing.Servicies
                 throw new LastPaymentInvoiceNotFoundException("Not found last InvoicePayment object.");
 
 
+            if (paymentInvoiceWithholdingTaxes is null)
+                throw new ArgumentNullException(nameof(paymentInvoiceWithholdingTaxes));
+
             lastPaymentInvoice.InvoiceTaxesWrapper ??= new PaymentInvoiceTaxesWrapper();
             lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes ??= new List<PaymentInvoiceWithholdingTax>();
+
+
+            foreach (var paymentInvoiceWithholdingTax in paymentInvoiceWithholdingTaxes)
+                paymentInvoiceWithholdingTax.TaxRate = paymentInvoiceWithholdingTax.TaxRate.ToSatRounding();
+
+
             lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes.AddRange(paymentInvoiceWithholdingTaxes);
         }
 
@@ -517,7 +538,7 @@ namespace Invoicing.Servicies
                 Base = pbase,
                 TaxId = taxId,
                 TaxTypeId = taxTypeId,
-                TaxRate = taxRate,
+                TaxRate = taxRate.ToSatRounding(),
                 Amount = amount
             };
 
@@ -529,7 +550,7 @@ namespace Invoicing.Servicies
         /// Self-calculating
         /// </summary>
         /// <param name="taxId">Impuesto:Atributo requerido para señalar la clave del tipo de impuesto retenido aplicable al concepto.</param>
-        /// <param name="taxTypeId">TipoFactor:Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
+        /// <param name="taxTypeId">TipoFactor:|Tasa|Cuota|Exento|: Atributo requerido para señalar la clave del tipo de factor que se aplica a la base del impuesto.</param>
         /// <param name="taxRate">TasaOCuota:Atributo requerido para señalar la tasa o cuota del impuesto que se retiene para el presente concepto.</param>
         public void AddWithholdingTax(string taxId, string taxTypeId, decimal taxRate)
         {
@@ -554,8 +575,8 @@ namespace Invoicing.Servicies
                 Base = lastPaymentInvoice.PaymentAmount,
                 TaxId = taxId,
                 TaxTypeId = taxTypeId,
-                TaxRate = taxRate,
-                Amount = lastPaymentInvoice.PaymentAmount * taxRate
+                TaxRate = taxRate.ToSatRounding(),
+                Amount = lastPaymentInvoice.PaymentAmount * taxRate.ToSatRounding()
             };
 
             lastPaymentInvoice.InvoiceTaxesWrapper.WithholdingTaxes.Add(paymentInvoiceWithholdingTax);

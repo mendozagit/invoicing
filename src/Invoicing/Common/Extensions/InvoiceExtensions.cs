@@ -14,7 +14,7 @@ public static class InvoiceExtensions
         return dateTime.ToString(SatFormat);
     }
 
-    public static decimal ToSatRounding(this decimal value, int decimalPlaces,
+    public static decimal ToSatRounding(this decimal value, int decimalPlaces=6,
         MidpointRounding roundingStrategy = MidpointRounding.AwayFromZero)
     {
         return Math.Round(value, decimalPlaces, roundingStrategy);

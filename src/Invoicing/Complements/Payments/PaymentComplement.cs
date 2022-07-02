@@ -63,7 +63,7 @@ public class PaymentComplement : ComputeSettings, IComputable
             //Compute payment summary
             ComputePaymentSummary(payment, invoiceWitholdingTaxes, invoiceTransferredTaxes);
 
-            RemoveUnnecessaryElements();
+            
         }
     }
 
@@ -82,9 +82,7 @@ public class PaymentComplement : ComputeSettings, IComputable
         }
     }
 
-    private void RemoveUnnecessaryElements()
-    {
-    }
+  
 
     private void ComputePaymentSummary(Payment payment, List<PaymentInvoiceWithholdingTax> witholdingTaxes,
         List<PaymentInvoiceTransferredTax> transferredTaxes)
